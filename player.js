@@ -22,6 +22,7 @@
         this.shooty = false
         this.shootyint = 0
         this.shootytimer = 12000
+        this.special = false
     }
     update(deltaTime){
         if(this.game.keys.includes("ArrowUp")) this.speedY = -this.maxSpeed
@@ -33,7 +34,7 @@
         else if (this.y < -this.height * 0.5) this.y = -this.height * 0.5
         //handle projectiles
         this.projectiles.forEach(projectile => {
-            projectile.update()
+            projectile.update(deltaTime)
         })
         this.projectiles = this.projectiles.filter(projectile => !projectile.markedForDeletion )
         // sprite animation
@@ -91,6 +92,11 @@
         this.powerUp = true;
         if(this.game.ammo < this.game.ammo) this.game.ammo = this.game.maxAmmo
     }
+    shootLaser(){
+        this.projectiles.push(new Laser(this.game, this.x + 80, this.y + 175))
+        this.special = true
+
+    }
 }
 
 
@@ -108,6 +114,8 @@ class Projectile {
         this.speed = 3
         this.markedForDeletion = false
         this.image = document.getElementById("projectile")
+        this.piercing = false
+        this.damage = 1
     }
     update(){
         this.x += this.speed
@@ -116,4 +124,39 @@ class Projectile {
     draw(context){
         context.drawImage(this.image, this.x, this.y);
     }
+}
+
+class Laser extends Projectile {
+    constructor(game){
+        super(game)
+        this.x = 40
+        this.y = this.game.player.y + 30
+        this.width = this.game.width * 0.7
+        this.height = 8
+        this.markedForDeletion = false
+        this.laserTimer = 0
+        this.laserMax = 5000
+        this.piercing = true
+        this.damage = 0.2
+        console.log(this)
+    }
+
+    update(deltaTime){
+        this.y = this.game.player.y + 30
+        if(this.laserTimer > this.laserMax){
+            console.log("deleted")
+            this.markedForDeletion = true
+            this.game.player.special = false
+            this.laserTimer = 0
+        }else {
+            console.log(this.laserTimer)
+            this.laserTimer+= deltaTime
+        }
+    }
+
+    draw(context){
+        // console.log("ig")
+        context.fillRect(this.x, this.y, this.width, this.height)
+    }
+
 }

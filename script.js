@@ -140,8 +140,9 @@ window.addEventListener('load', function(){
 
                this.player.projectiles.forEach(projectile => {
                 if(this.checkCollisons(projectile, enemy)){
-                    enemy.lives--
-                    projectile.markedForDeletion = true
+                    console.log("bruh")
+                    enemy.lives-= projectile.damage
+                    if(!projectile.piercing) projectile.markedForDeletion = true
                     this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5))
                     if (enemy.lives <= 0){
                         enemy.markedForDeletion = true;

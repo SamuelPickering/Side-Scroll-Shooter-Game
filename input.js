@@ -11,6 +11,10 @@
                 this.game.player.shootTop()
             } else if (e.key === "d"){
                 this.game.debug = !this.game.debug
+            }else if (e.key === "x"){
+                if(!this.game.player.special){
+                this.game.player.shootLaser()
+            }
             }
             
         })
