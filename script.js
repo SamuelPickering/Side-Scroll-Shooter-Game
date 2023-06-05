@@ -1,3 +1,12 @@
+import Player from "./player.js"
+import UI from "./ui.js"
+import { Angler1, Angler2, LuckyFish, HiveWhale, Drone} from "./enemy.js"
+import InputHandler from "./input.js"
+import { Background, Layer} from "./background.js"
+
+
+
+
 window.addEventListener('load', function(){
     const canvas = document.getElementById('canvas1')
     const ctx = canvas.getContext('2d')
@@ -5,55 +14,6 @@ window.addEventListener('load', function(){
     canvas.height = 500
 
 
-    class InputHandler {
-        constructor(game){
-            this.game = game;
-            window.addEventListener('keydown', e => {
-                if( (e.key === "ArrowUp" ||
-                    e.key === "ArrowDown"
-                )
-                 && !this.game.keys.includes(e.key)){
-                    this.game.keys.push(e.key)
-                } else if (e.key === " "){
-                    this.game.player.shootTop()
-                } else if (e.key === "d"){
-                    this.game.debug = !this.game.debug
-                }
-                
-            })
-            window.addEventListener('keyup', e =>{
-                if(this.game.keys.includes(e.key)){
-                    this.game.keys.splice(this.game.keys.indexOf(e.key, 1), 1)
-                }
-                
-            })
-            window.addEventListener('keyup', e =>{
-                if(this.game.keys.includes(e.key)){
-                    this.game.keys.splice(this.game.keys.indexOf(e.key, 1), 1)
-                }
-               
-            })
-        }
-    }
-    class Projectile {
-        constructor(game, x, y){
-            this.game = game
-            this.x = x
-            this.y = y
-            this.width = 10
-            this.height = 3
-            this.speed = 3
-            this.markedForDeletion = false
-            this.image = document.getElementById("projectile")
-        }
-        update(){
-            this.x += this.speed
-            if(this.x > this.game.width * 0.8) this.markedForDeletion = true
-        }
-        draw(context){
-            context.drawImage(this.image, this.x, this.y);
-        }
-    }
     class Particle {
         constructor(game, x, y){
             this.game = game
@@ -95,286 +55,8 @@ window.addEventListener('load', function(){
         }
 
     }
-    class Player {
-        constructor(game){
-            this.game = game;
-            this.width = 120;
-            this.height = 190
-            this.x = 20
-            this.y = 100
-            this.frameX = 0
-            this.frameY = 0
-            this.maxFrame = 37
-            this.speedY = 0
-            this.maxSpeed = 2
-            this.projectiles = []
-            this.image = document.getElementById("player")
-            this.powerUp = false
-            this.powerUpTimer = 0 
-            this.powerUPLimit = 10000
-            this.shooty = false
-            this.shootyint = 0
-            this.shootytimer = 12000
-        }
-        update(deltaTime){
-            if(this.game.keys.includes("ArrowUp")) this.speedY = -this.maxSpeed
-            else if (this.game.keys.includes("ArrowDown")) this.speedY = this.maxSpeed
-            else this.speedY = 0
-            this.y += this.speedY
-            // vertical boundaries
-            if(this.y > this.game.height - this.height * 0.5) this.y = this.game.height - this.height * 0.5
-            else if (this.y < -this.height * 0.5) this.y = -this.height * 0.5
-            //handle projectiles
-            this.projectiles.forEach(projectile => {
-                projectile.update()
-            })
-            this.projectiles = this.projectiles.filter(projectile => !projectile.markedForDeletion )
-            // sprite animation
-            if (this.frameX < this.maxFrame){
-                this.frameX++
-            }else {
-                this.frameX = 0
-            }
-            if(this.powerUp){
-                if (this.powerUpTimer > this.powerUPLimit){
-                    this.powerUpTimer = 0
-                    this.powerUp = false
-                    this.frameY = 0
-                }else {
-                    this.powerUpTimer += deltaTime
-                    this.frameY = 1
-                    this.game.ammo += 0.1
-                }
-            }
-            if(this.shooty){
-                if(this.shootyint > this.shootytimer){
-                    this.shootyint = 0
-                    this.shooty = false
-                } else {
-                    this.shootyint += deltaTime
-                }
-            }
-        }
-        draw(context){
-            if(this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height)
-            if (this.shooty) context.fillRect(this.x,this.y, this.width, this.height)
-            this.projectiles.forEach(projectile => {
-                projectile.draw(context)
-            })
-            context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height)
-
-        }
-        shootTop(){
-            if(this.game.ammo > 0){
-            this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30))
-            this.game.ammo--
-            }
-            if(this.powerUp){
-                this.shootBottom()
-            }
-            
-        }
-        shootBottom(){
-            if(this.game.ammo > 0){
-                this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 175))
-            }
-        }
-        enterPowerUp(){
-            this.powerUpTimer = 0;
-            this.powerUp = true;
-            if(this.game.ammo < this.game.ammo) this.game.ammo = this.game.maxAmmo
-        }
-    }
-    class Enemy {
-        constructor(game){
-            this.game = game;
-            this.x = this.game.width
-            this.speedX = Math.random() * -1.5 - 1.5
-            this.markedForDeletion = false
-            this.frameX = 0
-            this.frameY = 0
-            this.maxFrame = 37
-        }
-        update(){
-            this.x += this.speedX - this.game.speed
-            if( this.x + this.width < 0) this.markedForDeletion = true;
-            // sprite animation
-            if(this.frameX < this.maxFrame){
-                this.frameX++
-            }else this.frameX = 0
-        }
-        draw(context){
-            if(this.game.debug) context.strokeRect(this.x,this.y, this.width, this.height )
-            context.drawImage(this.image,this.frameX * this.width,this.frameY *  this.height, this.width, this.height, this.x, this.y, this.width, this.height)
-
-            if (this.game.debug){
-                context.font = "20px Arial"
-                context.fillText(this.lives, this.x, this.y)
-            }
-        }
-    }
-    class Angler1 extends Enemy {
-        constructor(game){
-           super(game)
-           this.width = 228 
-           this.height = 169 
-           this.y = Math.random() * (this.game.height * 0.95 - this.height)
-           this.image = document.getElementById("angler1")
-           this.frameY = Math.floor(Math.random() * 3)
-           this.lives = 2
-           this.score = this.lives
-
-        }
-    }
 
 
-    class Angler2 extends Enemy {
-        constructor(game){
-           super(game)
-           this.width = 213
-           this.height = 165 
-           this.y = Math.random() * (this.game.height * 0.95 - this.height)
-           this.image = document.getElementById("angler2")
-           this.frameY = Math.floor(Math.random() * 2)
-           this.lives = 3
-           this.score = this.lives
-           this.item = true
-
-        }
-    }
-    class LuckyFish extends Enemy {
-        constructor(game){
-           super(game)
-           this.width = 99
-           this.height = 95
-           this.y = Math.random() * (this.game.height * 0.95 - this.height)
-           this.image = document.getElementById("lucky")
-           this.frameY = Math.floor(Math.random() * 2)
-           this.lives = 15
-           this.score = this.lives
-           this.type = "lucky"
-
-        }
-    }
-
-    class HiveWhale extends Enemy {
-        constructor(game){
-           super(game)
-           this.width = 400
-           this.height = 227
-           this.y = Math.random() * (this.game.height * 0.95 - this.height)
-           this.image = document.getElementById("hivewhale")
-           this.frameY = 0
-           this.lives = 15
-           this.score = this.lives
-           this.type = "hive"
-           this.speedX = Math.random() * -1.2 - 0.2
-
-        }
-    }
-
-    class Drone extends Enemy {
-        constructor(game, x, y){
-           super(game)
-           this.width = 115
-           this.height = 95
-           this.x = x
-           this.y = y
-           this.image = document.getElementById("drone")
-           this.frameY = Math.floor(Math.random() * 2)
-           this.lives = 3
-           this.score = this.lives
-           this.type = "drone"
-           this.speedX = Math.random() * -4.2 - 0.5
-
-        }
-    }
-
-    class Layer {
-        constructor(game, image, speedModifier){
-            this.game = game;
-            this.image = image;
-            this.speedModifier = speedModifier
-            this.width = 1768
-            this.height = 500
-            this.x = 0
-            this.y = 0
-
-        }
-        update(){
-            if (this.x <= -this.width) this.x = 0
-            this.x -= this.game.speed * this.speedModifier
-        }
-        draw(context){
-            context.drawImage(this.image, this.x, this.y)
-            context.drawImage(this.image, this.x + this.width, this.y)
-        }
-    }
-    class Background {
-        constructor(game){
-            this.game = game
-            this.image1 = document.getElementById('layer1')
-            this.image2 = document.getElementById('layer2')
-            this.image3 = document.getElementById('layer3')
-            this.image4 = document.getElementById('layer4')
-            this.layer1 = new Layer(this.game, this.image1, 0.2)
-            this.layer2 = new Layer(this.game, this.image2, 0.4)
-            this.layer3 = new Layer(this.game, this.image3, 1)
-            this.layer4 = new Layer(this.game, this.image4, 1.5)
-            this.layers = [this.layer1, this.layer2, this.layer3,]
-        }
-        update(){
-            this.layers.forEach(layer => layer.update())
-        }
-        draw(context){
-            this.layers.forEach(layer => layer.draw(context))
-        }
-    }
-    class UI {
-        constructor(game){
-            this.game = game;
-            this.fontSize = 25
-            this.fontFamily = "Bangers"
-            this.color = "white"
-        }
-        draw(context){
-            context.save()
-            context.fillStyle = this.color
-            context.shadowOffsetX = 2
-            context.shadowOffsetY = 2
-            context.shadowColor = "black"
-            context.font = this.fontSize + "px " + this.fontFamily
-            //score
-            context.fillText("Score: " +this.game.score,20,40)
-
-            //timer
-            const formattedTime = (this.game.gameTime * 0.001).toFixed(1)
-            context.fillText("timer: " + formattedTime, 20, 100)
-            // game over messages
-            if(this.game.gameOver){
-                context.textAlign = "center"
-                let message1
-                let message2
-                if(this.game.score > this.game.winningScore){
-                    message1 = "You Win!"
-                    message2 = "Well done"
-                } else {
-                    message1 = "You Lost"
-                    message2 = "Try again next time"
-                }
-                context.font = "70px " + this.fontFamily;
-                context.fillText(message1, this.game.width * 0.5, this.game.height * 0.5 - 40)
-                context.font = "25px " + this.fontFamily;
-                context.fillText(message2, this.game.width * 0.5, this.game.height * 0.5 + 40)
-            }
-            //ammo
-            if (this.game.player.powerUp) context.fillStyle = "#ffffbd"
-            for(let i = 0; i < this.game.ammo; i++){
-                context.fillRect(20 + 5 * i,50,3,20)
-            }
-            context.restore()
-        }
-    }
 
     class PowerUps {
         constructor(game, x, y){
@@ -387,7 +69,7 @@ window.addEventListener('load', function(){
             this.markedForDeletion = false
         }
         update(){
-            this.x -= this.game.speed
+            this.x -= this.game.speed + 1
             if( this.x + this.width < 0) this.markedForDeletion = true;
         }
 
@@ -445,7 +127,8 @@ window.addEventListener('load', function(){
                     this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5))
                 }
                    if(enemy.type === "lucky") this.player.enterPowerUp() 
-                   else this.score-- ;                         
+                   else{ 
+                    if(!this.gameOver) this.score-- ;     }                    
                 }
             this.powerUps.forEach(power => {
                 if (this.checkCollisons(this.player, power)){
