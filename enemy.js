@@ -18,7 +18,11 @@ export default  class Enemy {
     }
     draw(context){
         if(this.game.debug) context.strokeRect(this.x,this.y, this.width, this.height )
+        if(this.uniframe){
+            context.drawImage(this.image, this.x, this.y, this.width, this.height)
+        }else{
         context.drawImage(this.image,this.frameX * this.width,this.frameY *  this.height, this.width, this.height, this.x, this.y, this.width, this.height)
+        }
 
         if (this.game.debug){
             context.font = "20px Arial"
@@ -47,11 +51,12 @@ class Angler2 extends Enemy {
        this.width = 213
        this.height = 165 
        this.y = Math.random() * (this.game.height * 0.95 - this.height)
-       this.image = document.getElementById("angler2")
+       this.image = document.getElementById("ship2")
        this.frameY = Math.floor(Math.random() * 2)
        this.lives = 3
        this.score = this.lives
        this.item = true
+       this.uniframe = true     //meaning only 1 frame
 
     }
 }
