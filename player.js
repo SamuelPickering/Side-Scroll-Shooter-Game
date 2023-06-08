@@ -16,6 +16,7 @@
         this.maxSpeed = 2
         this.projectiles = []
         this.image = document.getElementById("player")
+        this.ships = 1
         this.powerUp = false
         this.powerUpTimer = 0 
         this.powerUPLimit = 10000
@@ -74,7 +75,9 @@
     }
     shootTop(){
         if(this.game.ammo > 0){
-        this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30))
+        this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30, 0))
+        this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30, 0.5))
+        this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30, -0.5))
         this.game.ammo--
         }
         if(this.powerUp){
@@ -105,7 +108,7 @@
 
 
 class Projectile {
-    constructor(game, x, y){
+    constructor(game, x, y, direction){
         this.game = game
         this.x = x
         this.y = y
@@ -116,9 +119,11 @@ class Projectile {
         this.image = document.getElementById("projectile")
         this.piercing = false
         this.damage = 1
+        this.direction = direction
     }
     update(){
-        this.x += this.speed
+        this.x += this.speed * 2
+        this.y += this.direction
         if(this.x > this.game.width * 0.8) this.markedForDeletion = true
     }
     draw(context){
