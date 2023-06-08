@@ -108,8 +108,26 @@ class Drone extends Enemy {
     }
 }
 
+class NewShip extends Enemy {
+    constructor(game, x, y){
+       super(game)
+       this.width = 115
+       this.height = 95
+       this.x = x
+       this.y = y
+       this.image = document.getElementById("ship2")
+       this.frameY = Math.floor(Math.random() * 2)
+       this.lives = 3
+       this.score = this.lives
+       this.speedX = Math.random() * -4.2 - 0.5
+       this.item = true
+       this.uniframe = true  
 
-export {Enemy, Angler1, Angler2, LuckyFish, HiveWhale, Drone};
+    }
+}
+
+
+export {Enemy, Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip};
 
 
 

@@ -1,6 +1,6 @@
 import Player from "./player.js"
 import UI from "./ui.js"
-import { Angler1, Angler2, LuckyFish, HiveWhale, Drone} from "./enemy.js"
+import { Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip} from "./enemy.js"
 import InputHandler from "./input.js"
 import { Background, Layer} from "./background.js"
 
@@ -10,8 +10,26 @@ import { Background, Layer} from "./background.js"
 window.addEventListener('load', function(){
     const canvas = document.getElementById('canvas1')
     const ctx = canvas.getContext('2d')
-    canvas.width = 700
+    canvas.width = 1000
     canvas.height = 500
+    console.log(shipped)
+
+    const shipMap = []
+    const tileShips = []
+    // i is increased by 45 bc there are 45 tiles
+    for(let i = 0; i < shipped.length; i+= 85){
+        shipMap.push(shipped.slice(i, i + 85))
+    }
+    console.log(shipMap)
+    // shipMap.forEach((row, i) =>{
+    //     row.forEach((symbol, j) => {
+    //         // console.log(j)
+    //         if(symbol === 2449){
+    //         console.log(j * 32)
+    //         tileShips.push(new NewShip(this, j * 32,i * 32))
+    //         }
+    //     })
+    // })
 
 
     class Particle {
@@ -104,6 +122,16 @@ window.addEventListener('load', function(){
             this.timeLimit = 55000
             this.speed = 1
             this.debug = false
+            this.cope = tileShips
+            shipMap.forEach((row, i) =>{
+                row.forEach((symbol, j) => {
+                    // console.log(j)
+                    if(symbol === 1){
+                    console.log(j * 32)
+                    tileShips.push(new NewShip(this, j * 32,i * 32))
+                    }
+                })
+            })
         }
         update(deltaTime){
             if(!this.gameOver) this.gameTime += deltaTime
@@ -119,7 +147,8 @@ window.addEventListener('load', function(){
             }
             this.particles.forEach(particle => particle.update())
             this.particles = this.particles.filter(particle => !particle.markedForDeletion)
-            this.enemies.forEach(enemy => {
+            // replacing enemies with cope ship array
+            this.cope.forEach(enemy => {
                 enemy.update();
                 if (this.checkCollisons(this.player, enemy)){
                    enemy.markedForDeletion = true
@@ -140,7 +169,7 @@ window.addEventListener('load', function(){
 
                this.player.projectiles.forEach(projectile => {
                 if(this.checkCollisons(projectile, enemy)){
-                    console.log("bruh")
+                    //console.log("bruh") this helped way to much
                     enemy.lives-= projectile.damage
                     if(!projectile.piercing) projectile.markedForDeletion = true
                     this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5))
@@ -161,7 +190,8 @@ window.addEventListener('load', function(){
                 }
                })
             })
-            this.enemies = this.enemies.filter(enemy => !enemy.markedForDeletion)
+            // replacing instances of enemies array with cope ship
+            this.cope = this.cope.filter(enemy => !enemy.markedForDeletion)
             this.powerUps.forEach(power => {power.update()})
             this.powerUps = this.powerUps.filter(power => !power.markedForDeletion)
             if( this.enemyTimer > this.enemyInterval && !this.gameOver){
@@ -178,11 +208,12 @@ window.addEventListener('load', function(){
             this.player.draw(context)
             this.particles.forEach(particle => particle.draw(context))
             this.powerUps.forEach(power => power.draw(context))
-            this.enemies.forEach(enemy => {
+            this.cope.forEach(enemy => {
                 enemy.draw(context)
             })
 
             this.background.layer4.draw(context)
+
         }
         addEnemy(){
             const randomize = Math.random();

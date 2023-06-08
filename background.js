@@ -27,7 +27,7 @@ class Layer {
         this.image = image;
         this.speedModifier = speedModifier
         this.width = 1768
-        this.height = 500
+        this.height = 600
         this.x = 0
         this.y = 0
 
