@@ -2,7 +2,7 @@ export default  class Enemy {
     constructor(game){
         this.game = game;
         this.x = this.game.width
-        this.speedX = Math.random() * -1.5 - 1.5
+        this.speedX = 2
         this.markedForDeletion = false
         this.frameX = 0
         this.frameY = 0
@@ -119,7 +119,7 @@ class NewShip extends Enemy {
        this.frameY = Math.floor(Math.random() * 2)
        this.lives = 3
        this.score = this.lives
-       this.speedX = Math.random() * -4.2 - 0.5
+       this.speedX = -2
        this.item = true
        this.uniframe = true  
 

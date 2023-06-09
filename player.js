@@ -5,9 +5,9 @@
  export default class Player {
     constructor(game){
         this.game = game;
-        this.width = 120;
-        this.height = 190
-        this.x = 20
+        this.width = 96;
+        this.height = 96
+        this.x = 60
         this.y = 100
         this.frameX = 0
         this.frameY = 0
@@ -16,7 +16,7 @@
         this.maxSpeed = 2
         this.projectiles = []
         this.image = document.getElementById("player")
-        this.ships = 1
+        this.ships = [new Ship(this.game, this.x, this.y), new Ship(this.game, this.x-20, this.y + 40), new Ship(this.game, this.x-20, this.y - 40),]
         this.powerUp = false
         this.powerUpTimer = 0 
         this.powerUPLimit = 10000
@@ -24,12 +24,25 @@
         this.shootyint = 0
         this.shootytimer = 12000
         this.special = false
+        this.places = [100, 140]
+        this.isSwitching = false
+        this.accounted = 0
     }
     update(deltaTime){
         if(this.game.keys.includes("ArrowUp")) this.speedY = -this.maxSpeed
         else if (this.game.keys.includes("ArrowDown")) this.speedY = this.maxSpeed
         else this.speedY = 0
         this.y += this.speedY
+        this.ships.forEach(ship => {
+            ship.update()
+        })
+        if(this.accounted === this.ships.length){ // this may cause a bug when hit lets see
+            console.log("accounted")
+            this.isSwitching = false
+            let temp = this.ships.shift()
+            this.ships.push(temp)
+            this.accounted = 0
+        } // this may cause a bug when hit lets see
         // vertical boundaries
         if(this.y > this.game.height - this.height * 0.5) this.y = this.game.height - this.height * 0.5
         else if (this.y < -this.height * 0.5) this.y = -this.height * 0.5
@@ -70,14 +83,20 @@
         this.projectiles.forEach(projectile => {
             projectile.draw(context)
         })
-        context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height)
+        // context.drawImage(this.image, this.x, this.y, this.width, this.height)
+        // context.drawImage(this.image, this.x, this.y + 40, this.width, this.height)
+        this.ships.forEach(ship => {
+            ship.draw(context)
+        })
 
     }
     shootTop(){
         if(this.game.ammo > 0){
-        this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30, 0))
-        this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30, 0.5))
-        this.projectiles.push(new Projectile(this.game, this.x + 80, this.y + 30, -0.5))
+        this.projectiles.push(new Projectile(this.game, this.x + 100, this.y + 60, 0))
+        if(this.shooty){
+        this.projectiles.push(new Projectile(this.game, this.x + 100, this.y + 70 , 0.5))
+        this.projectiles.push(new Projectile(this.game, this.x + 100, this.y + 50, -0.5))
+        }
         this.game.ammo--
         }
         if(this.powerUp){
@@ -99,6 +118,75 @@
         this.projectiles.push(new Laser(this.game, this.x + 80, this.y + 175))
         this.special = true
 
+    }
+}
+
+
+
+class Ship {
+    constructor(game, x, y, pos){
+        this.game = game
+        this.x = x
+        this.y = y
+        this.pos = pos
+        this.image = document.getElementById("player")
+        this.width = 96;
+        this.height = 96
+        this.desiredX = 0
+        this.desiredY = 0
+        this.places = 0
+        this.switcher = 0
+        
+
+    }
+    update(){
+        this.y += this.game.player.speedY
+        if(this.game.player.isSwitching){
+
+            console.log("Switching")
+            this.desiredY = this.game.player.ships[ this.game.player.ships.length - 1 - this.game.player.ships.indexOf(this)].y - this.y 
+            this.desiredX = this.game.player.ships[ this.game.player.ships.length - 1 - this.game.player.ships.indexOf(this)].x - this.x 
+            this.game.player.accounted++
+            if(this.game.player.ships.indexOf(this) > 0){
+                if(this.desiredY > 0){
+                    this.desiredY+= 2
+                }else if (this.desiredY < 0) {
+                    this.desiredY -= 2
+                }
+                if(this.desiredX > 0){
+                    this.desiredX += 2
+                }else if (this.desiredX < 0) {
+                    this.desiredX -= 2
+                }
+            }
+            
+            console.log(this.desiredY)
+            // if(this.desiredY > 0){
+            //     this.y+= 2
+            //     this.desiredY-= 2
+            // }else if (this.desiredY < 0){
+            //     this.y-= 2
+            //     this.desiredY+= 2
+            // }
+        }
+        if(this.desiredY > 0){
+            this.y+= 2
+            this.desiredY-= 2
+        }else if (this.desiredY < 0){
+            this.y-= 2
+            this.desiredY+= 2
+        }
+        if(this.desiredX > 0){
+            this.x+= 2
+            this.desiredX-= 2
+        }else if (this.desiredX < 0){
+            this.x-= 2
+            this.desiredX+= 2
+        }
+
+    }
+    draw(context){
+        context.drawImage(this.image, this.x, this.y, this.width, this.height)
     }
 }
 

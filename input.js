@@ -15,6 +15,9 @@
                 if(!this.game.player.special){
                 this.game.player.shootLaser()
             }
+            } else if (e.key === "c"){
+                console.log("if u")
+                this.game.player.isSwitching = true
             }
             
         })
