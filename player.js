@@ -16,7 +16,7 @@
         this.maxSpeed = 2
         this.projectiles = []
         this.image = document.getElementById("player")
-        this.ships = [new Ship(this.game, this.x, this.y), new Ship(this.game, this.x-20, this.y + 40), new Ship(this.game, this.x-20, this.y - 40),]
+        this.ships = [new Ship(this.game, this.x, this.y), new Ship(this.game, this.x-20, this.y + 40), new Ship(this.game, this.x-20, this.y - 40), new Ship(this.game, this.x-60, this.y + 20), new Ship(this.game, this.x-60, this.y - 20)]
         this.powerUp = false
         this.powerUpTimer = 0 
         this.powerUPLimit = 10000
@@ -147,7 +147,7 @@ class Ship {
             this.desiredY = this.game.player.ships[ this.game.player.ships.length - 1 - this.game.player.ships.indexOf(this)].y - this.y 
             this.desiredX = this.game.player.ships[ this.game.player.ships.length - 1 - this.game.player.ships.indexOf(this)].x - this.x 
             this.game.player.accounted++
-            if(this.game.player.ships.indexOf(this) > 0){
+            if(this.game.player.ships.indexOf(this) > 2){
                 if(this.desiredY > 0){
                     this.desiredY+= 2
                 }else if (this.desiredY < 0) {
@@ -160,7 +160,7 @@ class Ship {
                 }
             }
             
-            console.log(this.desiredY)
+            console.log( this.y + "switching to " + this.desiredY)
             // if(this.desiredY > 0){
             //     this.y+= 2
             //     this.desiredY-= 2
