@@ -20,7 +20,7 @@
         this.powerUp = false
         this.powerUpTimer = 0 
         this.powerUPLimit = 10000
-        this.shooty = false
+        this.shooty = true
         this.shootyint = 0
         this.shootytimer = 12000
         this.special = false
@@ -79,7 +79,7 @@
     }
     draw(context){
         if(this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height)
-        if (this.shooty) context.fillRect(this.x,this.y, this.width, this.height)
+        //if (this.shooty) context.fillRect(this.x,this.y, this.width, this.height)
         this.projectiles.forEach(projectile => {
             projectile.draw(context)
         })
@@ -92,11 +92,12 @@
     }
     shootTop(){
         if(this.game.ammo > 0){
-        this.projectiles.push(new Projectile(this.game, this.x + 100, this.y + 60, 0))
-        if(this.shooty){
-        this.projectiles.push(new Projectile(this.game, this.x + 100, this.y + 70 , 0.5))
-        this.projectiles.push(new Projectile(this.game, this.x + 100, this.y + 50, -0.5))
-        }
+        this.projectiles.push(new Projectile(this.game, this.x + 70, this.y + 40, 0))
+        // this.projectiles.push(new Projectile(this.game, this.x + 100, this.y + 70, 0))
+
+        this.projectiles.push(new Projectile(this.game, this.x + 70, this.y + 60 , 0.5))
+        this.projectiles.push(new Projectile(this.game, this.x + 70, this.y , -0.5))
+        
         this.game.ammo--
         }
         if(this.powerUp){

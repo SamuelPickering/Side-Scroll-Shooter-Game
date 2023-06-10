@@ -137,7 +137,7 @@ window.addEventListener('load', function(){
             if(!this.gameOver) this.gameTime += deltaTime
             if(this.gameTime > this.timeLimit) this.gameOver = true
             this.background.update()
-            this.background.layer4.update()
+            // this.background.layer4.update()
             this.player.update(deltaTime)
             if (this.ammoTimer > this.ammoInterval){
                 if (this.ammo < this.maxAmmo) this.ammo++;
@@ -212,7 +212,7 @@ window.addEventListener('load', function(){
                 enemy.draw(context)
             })
 
-            this.background.layer4.draw(context)
+
 
         }
         addEnemy(){
