@@ -1,6 +1,6 @@
 import Player from "./player.js"
 import UI from "./ui.js"
-import { Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip} from "./enemy.js"
+import { Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, Alien} from "./enemy.js"
 import InputHandler from "./input.js"
 import { Background, Layer} from "./background.js"
 
@@ -53,6 +53,7 @@ window.addEventListener('load', function(){
             // this.bottomBounceBoundary = 100
 
         }
+    
         
         update(){
             this.angle += this.va
@@ -72,6 +73,14 @@ window.addEventListener('load', function(){
             context.restore()
         }
 
+    }
+
+    class Explosion {
+        constructor(game, x, y){
+            this.game = game
+            this.x = x
+            this.y = y
+        }
     }
 
 
@@ -106,7 +115,8 @@ window.addEventListener('load', function(){
             this.input =  new InputHandler(this)
             this.ui = new UI(this)
             this.keys = []
-            this.enemies = []
+            this.enemies = [new Alien(this)]
+            this.enemyProjectiles = []
             this.particles = []
             this.powerUps = []
             this.enemyTimer = 0
@@ -132,6 +142,7 @@ window.addEventListener('load', function(){
                     }
                 })
             })
+            this.cope.push(new Alien(this))
         }
         update(deltaTime){
             if(!this.gameOver) this.gameTime += deltaTime
@@ -147,9 +158,21 @@ window.addEventListener('load', function(){
             }
             this.particles.forEach(particle => particle.update())
             this.particles = this.particles.filter(particle => !particle.markedForDeletion)
+            this.enemyProjectiles.forEach(projectile => {
+                projectile.update(deltaTime)
+                if (this.checkCollisons(this.player, projectile)){
+                    projectile.markedForDeletion = true
+                    this.player.lives--              // for now we are popping not shifting
+                    if(this.player.ships.length > 1){
+                    this.player.shipsLeft.push(this.player.ships.pop())
+                    }
+                }
+
+            })
+            this.enemyProjectiles= this.enemyProjectiles.filter(projectile => !projectile.markedForDeletion )
             // replacing enemies with cope ship array
             this.cope.forEach(enemy => {
-                enemy.update();
+                enemy.update(deltaTime);
                 if (this.checkCollisons(this.player, enemy)){
                    enemy.markedForDeletion = true
                    for(let i = 0; i < enemy.score; i++){
@@ -159,6 +182,8 @@ window.addEventListener('load', function(){
                    else{ 
                     if(!this.gameOver) this.score-- ;     }                    
                 }
+
+
             this.powerUps.forEach(power => {
                 if (this.checkCollisons(this.player, power)){
                     power.markedForDeletion = true
@@ -200,6 +225,7 @@ window.addEventListener('load', function(){
             }else {
                 this.enemyTimer += deltaTime
             }
+            // console.log(this.enemyProjectiles)
 
         }
         draw(context){
@@ -211,6 +237,7 @@ window.addEventListener('load', function(){
             this.cope.forEach(enemy => {
                 enemy.draw(context)
             })
+            this.enemyProjectiles.forEach(proj => proj.draw(context))
 
 
 

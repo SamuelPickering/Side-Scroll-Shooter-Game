@@ -55,8 +55,8 @@ export default class Background {
     constructor(game) {
       this.game = game;
       this.layer1 = new Layer(this.game, 0.1, "layer1");
-      this.layer2 = new Layer(this.game, 0.2, "layer2");
-      this.layer3 = new Layer(this.game, 0.3, "layer3");
+      this.layer2 = new Layer(this.game, 0.3, "layer2");
+      this.layer3 = new Layer(this.game, 0.9, "layer3");
       // this.layer4 = new Layer(this.game, 1.5, "layer4");
       this.layers = [this.layer1, this.layer2, this.layer3];
     }

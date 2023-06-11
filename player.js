@@ -1,8 +1,4 @@
-
-
-
-
- export default class Player {
+    export default class Player {
     constructor(game){
         this.game = game;
         this.width = 96;
@@ -13,14 +9,16 @@
         this.frameY = 0
         this.maxFrame = 37
         this.speedY = 0
-        this.maxSpeed = 2
+        this.maxSpeed = 3
         this.projectiles = []
         this.image = document.getElementById("player")
-        this.ships = [new Ship(this.game, this.x, this.y), new Ship(this.game, this.x-20, this.y + 40), new Ship(this.game, this.x-20, this.y - 40), new Ship(this.game, this.x-60, this.y + 20), new Ship(this.game, this.x-60, this.y - 20)]
+        this.ships = [new Ship(this.game, this.x, this.y),new Ship(this.game, this.x-60, this.y + 20), new Ship(this.game, this.x-60, this.y - 20) ] // the 4th and 5th ships are  new Ship(this.game, this.x-60, this.y + 20), new Ship(this.game, this.x-60, this.y - 20)         ,,,, new Ship(this.game, this.x-20, this.y + 40), new Ship(this.game, this.x-20, this.y - 40),
+        this.shipsLeft = []
         this.powerUp = false
         this.powerUpTimer = 0 
         this.powerUPLimit = 10000
         this.shooty = true
+        this.lives = 3
         this.shootyint = 0
         this.shootytimer = 12000
         this.special = false
@@ -94,9 +92,8 @@
         if(this.game.ammo > 0){
         this.projectiles.push(new Projectile(this.game, this.x + 70, this.y + 40, 0))
         // this.projectiles.push(new Projectile(this.game, this.x + 100, this.y + 70, 0))
-
-        this.projectiles.push(new Projectile(this.game, this.x + 70, this.y + 60 , 0.5))
-        this.projectiles.push(new Projectile(this.game, this.x + 70, this.y , -0.5))
+        if(this.lives >= 2) this.projectiles.push(new Projectile(this.game, this.x + 70, this.y + 60 , 0.5))
+        if(this.lives >= 3) this.projectiles.push(new Projectile(this.game, this.x + 70, this.y , -0.5))
         
         this.game.ammo--
         }
@@ -118,6 +115,7 @@
     shootLaser(){
         this.projectiles.push(new Laser(this.game, this.x + 80, this.y + 175))
         this.special = true
+        console.log(this.lives)
 
     }
 }
@@ -217,6 +215,7 @@ class Projectile {
     }
     draw(context){
         context.drawImage(this.image, this.x, this.y);
+
     }
 }
 
@@ -232,18 +231,15 @@ class Laser extends Projectile {
         this.laserMax = 5000
         this.piercing = true
         this.damage = 0.2
-        console.log(this)
     }
 
     update(deltaTime){
         this.y = this.game.player.y + 30
         if(this.laserTimer > this.laserMax){
-            console.log("deleted")
             this.markedForDeletion = true
             this.game.player.special = false
             this.laserTimer = 0
         }else {
-            console.log(this.laserTimer)
             this.laserTimer+= deltaTime
         }
     }
@@ -254,3 +250,26 @@ class Laser extends Projectile {
     }
 
 }
+
+class EnemyProjectile extends Projectile {
+    constructor(game, x, y, direction){
+        super(game, x, y, direction)
+        this.speed = -2
+        this.markedForDeletion = false
+        this.image = document.getElementById("projectile")
+    }
+    update(){
+
+        this.x += this.speed * 2
+        this.y += this.direction
+        if(this.x < 0){ 
+        this.markedForDeletion = true
+        // console.log("goodbye World")
+        }
+        // console.log("X of bullet is: " + this.x)
+    }
+
+}
+
+
+export {Projectile, EnemyProjectile}
