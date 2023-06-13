@@ -5,9 +5,11 @@
         this.height = 96
         this.x = 60
         this.y = 100
+        this.x2 = this.x - 30
         this.frameX = 0
         this.frameY = 0
         this.maxFrame = 37
+        this.speedX = 0
         this.speedY = 0
         this.maxSpeed = 3
         this.projectiles = []
@@ -27,10 +29,26 @@
         this.accounted = 0
     }
     update(deltaTime){
+
         if(this.game.keys.includes("ArrowUp")) this.speedY = -this.maxSpeed
         else if (this.game.keys.includes("ArrowDown")) this.speedY = this.maxSpeed
         else this.speedY = 0
+        if(this.game.keys.includes("ArrowLeft")) this.speedX = -this.maxSpeed
+        else if (this.game.keys.includes("ArrowRight")) this.speedX = this.maxSpeed
+        else this.speedX = 0
+        console.log(this.speedX)
+        console.log("first this.y " + this.speedY)
+        let coom = this.y
+        if(this.speedX > Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY)){
+            this.speedX = this.speedX * 0.5
+            this.speedY = this.speedY * 0.5
+        }
+        console.log(this.speedX)
+        console.log("second this.Y" + this.speedY)
+        console.log(coom - this.y)
+        this.x += this.speedX
         this.y += this.speedY
+        this.x2 = this.x - 30
         this.ships.forEach(ship => {
             ship.update()
         })
@@ -76,7 +94,7 @@
         }
     }
     draw(context){
-        if(this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height)
+        if(this.game.debug) context.strokeRect(this.x2, this.y, this.width, this.height)
         //if (this.shooty) context.fillRect(this.x,this.y, this.width, this.height)
         this.projectiles.forEach(projectile => {
             projectile.draw(context)
@@ -140,6 +158,7 @@ class Ship {
     }
     update(){
         this.y += this.game.player.speedY
+        this.x += this.game.player.speedX
         if(this.game.player.isSwitching){
 
             console.log("Switching")
@@ -211,7 +230,7 @@ class Projectile {
     update(){
         this.x += this.speed * 2
         this.y += this.direction
-        if(this.x > this.game.width * 0.8) this.markedForDeletion = true
+        if(this.x > this.game.width * 0.9) this.markedForDeletion = true
     }
     draw(context){
         context.drawImage(this.image, this.x, this.y);
@@ -270,6 +289,15 @@ class EnemyProjectile extends Projectile {
     }
 
 }
+// MovementX = this.speedX
+// MovementY = this.speedY
+// weird shit moveDistance = Math.sqrt(this.speedX * this.speedX + this.speedY * move.y)
+/*
 
+ MovementX = this.speedX
+ MovementY = this.speedY
+ weird shit moveDistance = Math.sqrt(this.speedX * this.speedX + this.speedY * this)
+ if(moveDistance > move)
+*/
 
 export {Projectile, EnemyProjectile}

@@ -3,7 +3,8 @@
         this.game = game;
         window.addEventListener('keydown', e => {
             if( (e.key === "ArrowUp" ||
-                e.key === "ArrowDown"
+                e.key === "ArrowDown" || e.key === "ArrowLeft" ||
+                e.key === "ArrowRight"
             )
              && !this.game.keys.includes(e.key)){
                 this.game.keys.push(e.key)
@@ -23,15 +24,16 @@
         })
         window.addEventListener('keyup', e =>{
             if(this.game.keys.includes(e.key)){
-                this.game.keys.splice(this.game.keys.indexOf(e.key, 1), 1)
+                console.log(this.game.keys.indexOf(e.key))
+                this.game.keys.splice(this.game.keys.indexOf(e.key), 1)
             }
             
         })
-        window.addEventListener('keyup', e =>{
-            if(this.game.keys.includes(e.key)){
-                this.game.keys.splice(this.game.keys.indexOf(e.key, 1), 1)
-            }
+        // window.addEventListener('keyup', e =>{
+        //     if(this.game.keys.includes(e.key)){
+        //         this.game.keys.splice(this.game.keys.indexOf(e.key, 1), 1)
+        //     }
            
-        })
+        // })
     }
 }
