@@ -60,8 +60,14 @@
             this.accounted = 0
         } // this may cause a bug when hit lets see
         // vertical boundaries
-        if(this.y > this.game.height - this.height * 0.5) this.y = this.game.height - this.height * 0.5
-        else if (this.y < -this.height * 0.5) this.y = -this.height * 0.5
+        if(this.y > this.game.height - this.height * 0.5){ 
+         this.y = this.game.height - this.height * 0.5 
+         this.speedY = 0
+        }
+        else if (this.y < -this.height * 0.5){ 
+            this.y = -this.height * 0.5
+            this.speedY = 0 
+        }
         //handle projectiles
         this.projectiles.forEach(projectile => {
             projectile.update(deltaTime)
@@ -253,7 +259,8 @@ class Laser extends Projectile {
     }
 
     update(deltaTime){
-        this.y = this.game.player.y + 30
+        this.y = this.game.player.y + 44
+        this.x = this.game.player.x + 82
         if(this.laserTimer > this.laserMax){
             this.markedForDeletion = true
             this.game.player.special = false

@@ -32,6 +32,28 @@ window.addEventListener('load', function(){
     //         }
     //     })
     // })
+    
+        
+    let gamesong = new Audio()
+    gamesong.src = "assets/Lovely VGM 522 - Command & Conquer_ Tiberian Sun - Scouting.mp3"
+    gamesong.currentTime = 1
+    gamesong.play();
+    let songtimer = 0
+    function musicUpdate( songtimer, deltaTime, gamesong){
+        songtimer += deltaTime
+        console.log(gamesong.paused)
+        if(songtimer > 105000 && !gamesong.paused){
+            gamesong.pause()
+            songtimer = 0
+        }else if(gamesong.paused) {
+            gamesong.currentTime = 1
+            gamesong.play()
+        }
+        
+        return songtimer
+    }
+
+    
 
 
     class Particle {
@@ -239,9 +261,9 @@ window.addEventListener('load', function(){
                     //console.log("bruh") this helped way to much
                     enemy.lives-= projectile.damage
                     if(!projectile.piercing) projectile.markedForDeletion = true
-                    if(enemy.hasParts){
-                    this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5, enemy.parts))
-                    }
+                    // if(enemy.hasParts){
+                    // this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5, enemy.parts))
+                    // }
                     if (enemy.lives <= 0){
                         enemy.markedForDeletion = true;
                         this.addExplosion(enemy)
@@ -270,6 +292,7 @@ window.addEventListener('load', function(){
             }else {
                 this.enemyTimer += deltaTime
             }
+             songtimer = musicUpdate(songtimer, deltaTime, gamesong)
             // console.log(this.enemyProjectiles)
 
         }
