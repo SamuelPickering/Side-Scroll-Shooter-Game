@@ -171,7 +171,7 @@ class Ship {
         this.desiredY = 0
         this.places = 0
         this.switcher = 0
-        this.exhaustXOffset =  25
+        this.exhaustXOffset =  35
         this.exhaustYOffset = -15
         this.exhaustImage = document.getElementById("playerexhaust")
         this.exhaustWidth = 64
