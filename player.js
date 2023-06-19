@@ -171,7 +171,16 @@ class Ship {
         this.desiredY = 0
         this.places = 0
         this.switcher = 0
-        
+        this.exhaustXOffset =  25
+        this.exhaustYOffset = -15
+        this.exhaustImage = document.getElementById("playerexhaust")
+        this.exhaustWidth = 64
+        this.exhaustHeight = 64
+        this.exhaustspWidth = 64
+        this.exhaustspHeight = 64
+        this.exhaustFrame = 0
+        this.maxExhaustFrame = 3
+        this.frameOffset = 4
 
     }
     update(){
@@ -219,10 +228,13 @@ class Ship {
             this.x-= 2
             this.desiredX+= 2
         }
+        this.exhaustFrame > 3 ? this.exhaustFrame = 0 : this.exhaustFrame++;
+        
        
     }
     draw(context){
         context.drawImage(this.image, this.x, this.y, this.width, this.height)
+        context.drawImage(this.exhaustImage, (this.exhaustFrame + this.frameOffset) * this.exhaustspWidth, 0, this.exhaustspWidth, this.exhaustspHeight, this. x - this.exhaustXOffset, this.y - this.exhaustYOffset, this.exhaustWidth, this.exhaustHeight)
     }
 }
 
@@ -331,7 +343,7 @@ class EnemyProjectile extends Projectile {
     update(){
         if(this.rot === 1){
             this.angle += this.va
-            console.log(this.angle)
+        
         }
 
         this.x += this.speed * 2 * this.directionX
