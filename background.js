@@ -68,6 +68,9 @@ export default class Background {
     draw(context) {
       this.layers.forEach((layer) => layer.draw(context));
     }
+    restart(){
+      this.layers.forEach((layer) => layer.restart())
+    }
   }
   
   class Layer {
@@ -91,6 +94,9 @@ export default class Background {
     draw(context) {
       context.drawImage(this.image, this.x, this.y, 1000, 600);
       context.drawImage(this.image, this.x + this.image.width, this.y, 1000, 600);
+    }
+    restart(){
+      this.x = 0
     }
   }
 

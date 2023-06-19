@@ -36,16 +36,16 @@
         if(this.game.keys.includes("ArrowLeft")) this.speedX = -this.maxSpeed
         else if (this.game.keys.includes("ArrowRight")) this.speedX = this.maxSpeed
         else this.speedX = 0
-        console.log(this.speedX)
-        console.log("first this.y " + this.speedY)
+        // console.log(this.speedX)
+        // console.log("first this.y " + this.speedY)
         let coom = this.y
         if(this.speedX > Math.sqrt(this.speedX * this.speedX + this.speedY * this.speedY)){
             this.speedX = this.speedX * 0.5
             this.speedY = this.speedY * 0.5
         }
-        console.log(this.speedX)
-        console.log("second this.Y" + this.speedY)
-        console.log(coom - this.y)
+        // console.log(this.speedX)
+        // console.log("second this.Y" + this.speedY)
+        // console.log(coom - this.y)
         this.x += this.speedX
         this.y += this.speedY
         this.x2 = this.x - 30
@@ -98,6 +98,9 @@
                 this.shootyint += deltaTime
             }
         }
+        if(this.lives <= 0 && !this.debug){
+            this.game.gameOver = true
+        }
     }
     draw(context){
         if(this.game.debug) context.strokeRect(this.x2, this.y, this.width, this.height)
@@ -114,10 +117,10 @@
     }
     shootTop(){
         if(this.game.ammo > 0){
-        this.projectiles.push(new Projectile(this.game, this.x + 70, this.y + 40, 0))
+        this.projectiles.push(new Projectile(this.game, this.x + 70, this.y + 40, 1, 0))
         // this.projectiles.push(new Projectile(this.game, this.x + 100, this.y + 70, 0))
-        if(this.lives >= 2) this.projectiles.push(new Projectile(this.game, this.x + 70, this.y + 60 , 0.5))
-        if(this.lives >= 3) this.projectiles.push(new Projectile(this.game, this.x + 70, this.y , -0.5))
+        if(this.lives >= 2) this.projectiles.push(new Projectile(this.game, this.x + 70, this.y + 60 , 1, 0.5))
+        if(this.lives >= 3) this.projectiles.push(new Projectile(this.game, this.x + 70, this.y , 1, -0.5))
         
         this.game.ammo--
         }
@@ -140,6 +143,15 @@
         this.projectiles.push(new Laser(this.game, this.x + 80, this.y + 175))
         this.special = true
         console.log(this.lives)
+
+    }
+    restart(){
+        this.x = 60
+        this.y = 100
+        this.ships = []
+        this.ships = [new Ship(this.game, this.x, this.y),new Ship(this.game, this.x-60, this.y + 20), new Ship(this.game, this.x-60, this.y - 20) ]
+        this.projectiles = []
+        this.lives = 3
 
     }
 }
@@ -207,7 +219,7 @@ class Ship {
             this.x-= 2
             this.desiredX+= 2
         }
-
+       
     }
     draw(context){
         context.drawImage(this.image, this.x, this.y, this.width, this.height)
@@ -220,10 +232,13 @@ class Ship {
 
 
 class Projectile {
-    constructor(game, x, y, direction){
+    constructor(game, x, y, directionX, directionY, rot){
         this.game = game
         this.x = x
         this.y = y
+        this.directionX = directionX
+        this.directionY = directionY
+        this.rot = rot
         this.width = 10
         this.height = 3
         this.speed = 3
@@ -231,15 +246,41 @@ class Projectile {
         this.image = document.getElementById("projectile")
         this.piercing = false
         this.damage = 1
-        this.direction = direction
+        this.va = Math.random() * 0.2 - 0.1  //rotation speed, velocity of angle
+        this.angle = 0
+
     }
     update(){
+        if(this.rot === 1){
+            this.angle += this.va
+        }
         this.x += this.speed * 2
-        this.y += this.direction
+        this.y += this.directionY
         if(this.x > this.game.width * 0.9) this.markedForDeletion = true
     }
     draw(context){
+        if(this.rot === 1){
+            // context.save()
+            //  context.translate(this.x, this.y)
+            // context.rotate(this.angle)  // rotating particles
+            // context.drawImage(this.image, this.x, this.y)
+            // context.restore()
+            context.save();
+            context.translate(this.x, this.y);
+            context.rotate(this.angle);
+            context.drawImage(this.image, -this.image.width / 2, -this.image.height / 2);
+            context.strokeStyle = "red";
+            context.lineWidth = 2;
+            context.strokeRect(
+            -this.image.width / 2,
+            -this.image.height / 2,
+            this.image.width,
+            this.image.height
+);
+            context.restore();
+        }else{
         context.drawImage(this.image, this.x, this.y);
+        }
 
     }
 }
@@ -278,21 +319,48 @@ class Laser extends Projectile {
 }
 
 class EnemyProjectile extends Projectile {
-    constructor(game, x, y, direction){
-        super(game, x, y, direction)
-        this.speed = -2
+    constructor(game, x, y, directionX, directionY, rot){
+        super(game, x, y, directionX, directionY)
+        this.speed = 2
         this.markedForDeletion = false
+        this.rot = rot
         this.image = document.getElementById("projectile")
+        this.va = 1 * 0.2 - 0.1  //rotation speed, velocity of angle
+        this.angle = 0
     }
     update(){
+        if(this.rot === 1){
+            this.angle += this.va
+            console.log(this.angle)
+        }
 
-        this.x += this.speed * 2
-        this.y += this.direction
+        this.x += this.speed * 2 * this.directionX
+        this.y += this.directionY
         if(this.x < 0){ 
         this.markedForDeletion = true
         // console.log("goodbye World")
         }
         // console.log("X of bullet is: " + this.x)
+    }
+
+}
+
+
+class testEP extends Projectile {
+    constructor(game, x, y, directionX, directionY, rot, ang){
+        super(game, x, y, directionX, directionY)
+        this.speed = 2
+        this.markedForDeletion = false
+        this.rot = rot
+        this.ang = ang
+        console.log(ang)
+        this.image = document.getElementById("projectile")
+        this.va = 1 * 0.2 - 0.1  //rotation speed, velocity of angle
+        this.angle = 0
+    }
+    update(){
+        this.x += Math.sin(this.ang) * this.speed
+        this.y += Math.cos(this.ang) * this.speed
     }
 
 }
@@ -307,4 +375,4 @@ class EnemyProjectile extends Projectile {
  if(moveDistance > move)
 */
 
-export {Projectile, EnemyProjectile}
+export {Projectile, EnemyProjectile, testEP}

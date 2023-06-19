@@ -1,6 +1,6 @@
 import Player from "./player.js"
 import UI from "./ui.js"
-import { Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, Alien, Aliencu, NewShip5} from "./enemy.js"
+import { Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, Alien, Aliencu, NewShip5, SprayShip, AlienTarget, Meteor, ShipY,RevengeShip} from "./enemy.js"
 import InputHandler from "./input.js"
 import { Background, Layer} from "./background.js"
 
@@ -15,7 +15,7 @@ window.addEventListener('load', function(){
     console.log(shipped)
 
     const shipMap = []
-    const tileShips = []
+    // let this.cope = []
     // i is increased by 220 bc there are 220 tiles
     let tileAmount = 220
     for(let i = 0; i < shipped.length; i+= tileAmount){
@@ -28,12 +28,12 @@ window.addEventListener('load', function(){
     //         // console.log(j)
     //         if(symbol === 2449){
     //         console.log(j * 32)
-    //         tileShips.push(new NewShip(this, j * 32,i * 32))
+    //         this.cope.push(new NewShip(this, j * 32,i * 32))
     //         }
     //     })
     // })
     
-        
+    let inversioncount = 0
     let gamesong = new Audio()
     gamesong.src = "assets/Lovely VGM 522 - Command & Conquer_ Tiberian Sun - Scouting.mp3"
     gamesong.currentTime = 1
@@ -41,7 +41,6 @@ window.addEventListener('load', function(){
     let songtimer = 0
     function musicUpdate( songtimer, deltaTime, gamesong){
         songtimer += deltaTime
-        console.log(gamesong.paused)
         if(songtimer > 105000 && !gamesong.paused){
             gamesong.pause()
             songtimer = 0
@@ -172,40 +171,36 @@ window.addEventListener('load', function(){
             this.particles = []
             this.explosions = []
             this.powerUps = []
+            this.obstacles = []
             this.enemyTimer = 0
             this.enemyInterval = 1000;
+            this.offset = 0
             this.ammo = 20
             this.maxAmmo = 50
             this.ammoTimer = 0
             this.ammoInterval = 500
             this.gameOver = false;
+            this.paused = false
             this.score = 0
             this.winningScore = 50
             this.gameTime = 0
-            this.timeLimit = 55000
+            this.timeLimit = 85000
             this.speed = 1
             this.debug = false
-            this.cope = tileShips
-            shipMap.forEach((row, i) =>{
-                row.forEach((symbol, j) => {
-                    // console.log(j)
-                    if(symbol === 1){
-                    console.log(j * 32)
-                    tileShips.push(new NewShip(this, j * 32,i * 32 , 1, "type0"))
-                    }else if(symbol === 3){
-                        tileShips.push(new NewShip(this, j * 32,i * 32 , 1, "type1"))
-                    }
-                })
-            })
-            this.cope.push(new Alien(this))
-            this.cope.push(new Aliencu(600, 1, "type1"))
-            this.cope.push(new Aliencu(650, 1, "type1"))
-            this.cope.push(new Aliencu(700, 1, "type1"))
-            this.cope.push(new Aliencu(750, 1, "type1"))
-            this.cope.push(new Aliencu(800, 1, "type1"))
-            this.cope.push(new NewShip5(this, 850, 200, 1, "type0"))
+            this.cope = []
+            this.notInvertedCount = 0
+            this.invertedCount = 0
+            this.cope.push(new SprayShip (this, 200 + 850, 200, 1, "type0"))
+            this.cope.push(new AlienTarget(this, 200, 1, "type1"))
+            this.cope.push(new ShipY (this, 200, 0, 1, "type0"))
+            this.cope.push(new ShipY (this, 250, 500, -1, "type0"))
+            this.cope.push(new RevengeShip(this,700, 100, 1, "vengeful" ))
+            this.obstacles.push(new Meteor(this))
+
         }
+
         update(deltaTime){
+            // console.log(deltaTime)
             if(!this.gameOver) this.gameTime += deltaTime
             if(this.gameTime > this.timeLimit) this.gameOver = true
             this.background.update()
@@ -225,10 +220,12 @@ window.addEventListener('load', function(){
                 projectile.update(deltaTime)
                 if (this.checkCollisons2(this.player, projectile)){
                     projectile.markedForDeletion = true
+                    if(!this.debug){
                     this.player.lives--              // for now we are popping not shifting
                     if(this.player.ships.length > 1){
                     this.player.shipsLeft.push(this.player.ships.pop())
                     }
+                  }
                 }
 
             })
@@ -238,23 +235,20 @@ window.addEventListener('load', function(){
                 enemy.update(deltaTime);
                 if (this.checkCollisons2(this.player, enemy)){
                    enemy.markedForDeletion = true
+                   if(!this.debug){
                     this.player.lives--
                     if(this.player.ships.length > 1){
                         this.player.shipsLeft.push(this.player.ships.pop())
                         }
+                    }
                    if(enemy.type === "lucky") this.player.enterPowerUp() 
                    else{ 
                     if(!this.gameOver) this.score-- ;     }                    
                 }
+               
 
 
-            this.powerUps.forEach(power => {
-                if (this.checkCollisons(this.player, power)){
-                    power.markedForDeletion = true
-                    this.player.shooty = true
-                    this.player.shootyint = 0
-                }
-            })
+
 
                this.player.projectiles.forEach(projectile => {
                 if(this.checkCollisons(projectile, enemy)){
@@ -265,12 +259,16 @@ window.addEventListener('load', function(){
                     // this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5, enemy.parts))
                     // }
                     if (enemy.lives <= 0){
+                        if(enemy.type === "vengeful"){
+                            enemy.vengeShot()
+                        }
                         enemy.markedForDeletion = true;
                         this.addExplosion(enemy)
                         if (enemy.type === "hive"){
                             for(let i = 0; i < 2; i++){
                             this.enemies.push(new Drone(this, enemy.x + Math.random() * enemy.width , enemy.y + Math.random() * enemy.height * 0.5))
                             }
+
                         }
                         if(enemy.item){
                             this.powerUps.push(new PowerUps(this, enemy.x, enemy.y))
@@ -282,10 +280,18 @@ window.addEventListener('load', function(){
                 }
                })
             })
+            this.powerUps.forEach(power => {
+                if (this.checkCollisons(this.player, power)){
+                    power.markedForDeletion = true
+                    this.player.shooty = true
+                    this.player.shootyint = 0
+                }
+            })
             // replacing instances of enemies array with cope ship
             this.cope = this.cope.filter(enemy => !enemy.markedForDeletion)
             this.powerUps.forEach(power => {power.update()})
             this.powerUps = this.powerUps.filter(power => !power.markedForDeletion)
+            this.obstacles.forEach(obs => obs.update())
             if( this.enemyTimer > this.enemyInterval && !this.gameOver){
                 this.addEnemy()
                 this.enemyTimer = 0
@@ -302,6 +308,7 @@ window.addEventListener('load', function(){
             this.player.draw(context)
             this.particles.forEach(particle => particle.draw(context))
             this.powerUps.forEach(power => power.draw(context))
+            this.obstacles.forEach(obs => obs.draw(context))
             this.cope.forEach(enemy => {
                 enemy.draw(context)
             })
@@ -337,18 +344,86 @@ window.addEventListener('load', function(){
                     rect1.height + rect1.y > rect2.y) 
                           
         }
+        restartGame(){
+            this.cope.splice(0, this.cope.length)
+            this.invertedCount = 0
+            this.notInvertedCount = 0
+            console.log(this.cope)
+            this.gameTime = 0
+            this.score = 0
+            this.enemyProjectiles = []
+            this.particles = []
+            this.explosions = []
+            this.powerUps = []
+            this.ammo = 20
+            //  this.spawnEnemies()
+            console.log(this.cope)
+            this.player.restart()
+            this.background.restart()
+            gamesong.currentTime = 1
+            gamesong.play();
+            songtimer = 0
+            this.gameOver = false
+            this.paused = false
+            animate(0)
+
+        }
+        spawnEnemies(){
+            
+            shipMap.forEach((row, i) =>{
+                row.forEach((symbol, j) => {
+                    // console.log(j)
+                    if(symbol === 1){
+                    
+                    console.log(j * 32)
+                    this.cope.push(new NewShip(this, j * 32,i * 32 , 1, "type0", this.invertedCount))
+                    console.log("this shit should be here" + " id = " + this.invertedCount)
+                    console.log( "" + j * 32 + "  "  + i * 32)
+                    console.log(this.cope)
+                    this.notInvertedCount++; }
+                    // }else if(symbol === 3){
+                    //     this.cope.push(new NewShip(this, j * 32,i * 32 , 1, "type1", this.notInvertedCount))
+                     if(symbol === 4){
+                        this.cope.push(new NewShip(this, j * 32,i * 32 , -1, "type1", this.invertedCount))
+                        // console.log("There should be one at " + j * 32 + "and" + i * 32 )
+                        this.invertedCount++
+
+                    } else if (symbol === 6){
+                        this.cope.push(new NewShip5(this, j * 32, i * 32, 1, "type0"))
+                    }
+                })
+            })
+            
+            this.cope.push(new Alien(this))
+            this.cope.push(new Aliencu(this, 2000 + 600, 1, "type1"))
+            this.cope.push(new Aliencu(this, 2000 + 650, 1, "type1"))
+            this.cope.push(new Aliencu(this, 2000 + 700, 1, "type1"))
+            this.cope.push(new Aliencu(this, 2000 + 750, 1, "type1"))
+            this.cope.push(new Aliencu(this,  2000 + 800 + 2000, 1, "type1"))
+            this.cope.push(new NewShip5(this, 2000 + 850, 200, 1, "type0"))
+            // this.cope.forEach(enemy => enemy.startOffset())
+        }
+        pause(){
+            console.log("P was pressed ig")
+            this.paused = !this.paused
+        }
     }
 
     const game = new Game(canvas.width, canvas.height)
+    // game.spawnEnemies()
+
     let lasTime = 0
     //animation loop
     function animate(timeStamp){
         const deltaTime = timeStamp - lasTime
         lasTime = timeStamp
+        if(!game.gameOver && !game.paused){
+
         ctx.clearRect(0,0, canvas.width, canvas.height)
         game.update(deltaTime)
+    }
         game.draw(ctx)
-        requestAnimationFrame(animate)
+         if (!game.gameOver) requestAnimationFrame(animate)
     }
     animate(0)
     console.log("hi")

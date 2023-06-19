@@ -19,6 +19,10 @@
             } else if (e.key === "c"){
                 console.log("if u")
                 this.game.player.isSwitching = true
+            } else if (e.key === "Enter" && this.game.gameOver){
+                this.game.restartGame()
+            } else if (e.key === "p" || e.key === "P"){
+                this.game.pause()
             }
             
         })

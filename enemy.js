@@ -1,4 +1,4 @@
-import { EnemyProjectile } from "./player.js";
+import { EnemyProjectile, testEP } from "./player.js";
 
 
 
@@ -15,6 +15,7 @@ export default  class Enemy {
         this.onScreen = false
     }
     update(deltaTime){
+
         this.x += this.speedX - this.game.speed
         if(this.x - this.width < 1000){ // on screen
             this.onScreen = true
@@ -36,7 +37,22 @@ export default  class Enemy {
         }
         if(this.type === "type1"){
             this.y = this.curveRadius + (Math.sin(this.x * 0.01) * this.curveHeight) * this.inversion
+            // // if(this.inversion === -1){
+            // //     this.y += 200
+            // }
         }
+        if(this.id >= 7 && this.type !== "type0"){
+            this.y += 200
+            // console.log(this.y)
+        }
+        // if(this.inversion === -1){
+        //     console.log(this.id)
+        // }
+        if(this.specialMessage){
+            console.log(`I am here at x: ${this.x}, y: ${this.y}, id: {this.id}`)
+            console.log(this.x)
+        }
+ 
     }
     
     draw(context){
@@ -53,7 +69,16 @@ export default  class Enemy {
         }
     }
     shootProjectile(){
-        this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 ,0))
+        this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 ,-1, 0))
+    }
+    startOffset(){
+        this.x -= this.game.offset
+    }
+    vengeShot(){
+        this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 ,-1, 2.25, 1))
+        this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 ,-1, 0, 1))
+        this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 ,-1, -2.25, 1))
+        console.log("I'll have my vengeance")
     }
 }
 class Angler1 extends Enemy {
@@ -135,10 +160,11 @@ class Drone extends Enemy {
 }
 
 class NewShip extends Enemy {
-    constructor(game, x, y, inversion, type){
+    constructor(game, x, y, inversion, type, id){
        super(game)
        this.width = 115
        this.height = 95
+       this.id = id
        this.x = x
        this.y = y
        this.inversion = inversion
@@ -159,6 +185,7 @@ class NewShip extends Enemy {
        this.isShooting = Math.floor(Math.random() * 2)
        this.hasParts = true
        this.parts = document.getElementById("ship2Part")
+       this.specialMessage = `I am here at x: ${this.x}, y: ${this.y}`
        
     }
 }
@@ -189,6 +216,116 @@ class NewShip5 extends Enemy {
        this.parts = document.getElementById("ship5Part")
        
     }
+}
+class SprayShip extends Enemy {
+    constructor(game, x,y, inversion, type){
+        super(game)
+        this.width = 115
+        this.height = 95
+        this.x = x
+        this.y = y
+        this.image = document.getElementById("ship3")
+        this.inversion = inversion
+        this.type = type
+        this.uniframe = true
+        this.speedX = -0.2
+        this.yShot = 10
+        this.xShot = -1
+        this.shootInterval = 300
+        this.shootTimer = 0
+        this.isShooting = 1
+        this.lives = 4
+        this.score = 10
+        this.bing = 1
+        this.sprayCount = 8
+
+
+
+
+    }
+    update(deltaTime){
+        this.x += this.speedX - this.game.speed
+        if(this.x - this.width < 1000){ // on screen
+            this.onScreen = true
+        }
+        if( this.x + this.width < 0) this.markedForDeletion = true;
+        // sprite animation
+        if(this.frameX < this.maxFrame){
+            this.frameX++
+        }else this.frameX = 0
+        if(this.isShooting >= 1){
+            if(this.shootTimer > this.shootInterval){
+                if(this.yShot < -10){
+                    this.bing = -1
+                    this.xShot = 1
+                }
+                this.shootProjectile()
+                
+                this.shootTimer = 0
+                this.yShot-= 0.2 * 9 * this.bing
+
+            }else {
+                if(this.onScreen){
+                this.shootTimer += deltaTime
+                }
+            }
+        }
+        // console.log(this.yShot)
+        // console.log(this.xShot)
+    }
+    shootProjectile(){
+        this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 ,this.xShot, this.yShot, 1))
+    }
+    shootTest(){
+        this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 ,this.xShot, 2., 1))
+        this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 ,this.xShot, 0., 1))
+        this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 ,this.xShot, -2., 1))
+    }
+    shootSpread(num){
+        for(let i = 0; i < num; i++){
+            this.game.enemyProjectiles.push(new testEP(this.game, this.x, this.y + this.height * 0.5, -1, 1 / num * i, 1, 4))
+        }
+    }
+}
+class ShipY extends Enemy {
+    constructor(game, x,y, inversion, type){
+        super(game)
+        this.width = 115
+        this.height = 95
+        this.x = x
+        this.y = y - this.height / 2
+        this.image = document.getElementById("shipY")
+        this.inversion = inversion
+        this.type = type
+        this.uniframe = true
+        this.lives = 1
+        this.score = 2
+        this.speedY = 4
+    }
+    update(){
+        this.y+= this.speedY * this.inversion
+    }
+}
+class RevengeShip extends Enemy {
+    constructor(game, x,y, inversion, type){
+        super(game)
+        this.width = 115
+        this.height = 95
+        this.x = x
+        this.y = y 
+        this.image = document.getElementById("revengeShip")
+        this.inversion = inversion
+        this.type = type
+        this.uniframe = true
+        this.lives = 3
+        this.score = 2
+        this.speedX = -2
+        this.isShooting = 0
+        this.onScreen = false
+        this.vengeful = true
+    }
+
+
 }
 class Alien {
     constructor(game){
@@ -274,6 +411,7 @@ class Alien {
             }
         }
 
+
     }
     draw(context){
       context.drawImage(this.image, this.frame * this.spriteWidth, 0, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height)
@@ -282,9 +420,15 @@ class Alien {
 
         this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y + this.height / 2, 0))
     }
+    startOffset(){
+        console.log("kyfjf")
+        this.x -= this.game.offset
+    }
+    
 }
 class Aliencu{
-    constructor(x, inversion, type){
+    constructor(game, x, inversion, type){
+        this.game = game
         this.x = x
         this.inversion = inversion
         this.type = type
@@ -314,6 +458,8 @@ class Aliencu{
         this.sin =  Math.sin(this.x) * 3
         this.sinHeight = 2
         this.frequency = 2
+        this.onScreen = false
+        this.markedForDeletion = false
   
   
     }
@@ -344,6 +490,10 @@ class Aliencu{
         //     this.bingCounter++
         //   }
         // if(gameFrame % this.flapSpeed === 0){ fix later
+        if(this.x - this.width < 1000){ // on screen
+            this.onScreen = true
+        }
+        if( this.x + this.width < 0) this.markedForDeletion = true;
             this.frame > 4 ? this.frame = 0 : this.frame++;
             this.x-= 4
         // }
@@ -352,13 +502,73 @@ class Aliencu{
         }
   
     }
+    startOffset(){
+        console.log("kyfjf")
+        this.x -= this.game.offset
+    }
     draw(context){
       context.drawImage(this.image, this.frame * this.spriteWidth, 0, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height)
     }
   }
 
+  class AlienTarget {
+    constructor(game, x, inversion, type){
+        this.game = game
+        this.x = x
+        this.inversion = inversion
+        this.type = type
+        this.image = new Image()
+        this.image.src = 'assets/inverted alientest.png'
+        this.speed = 5
+        this.spriteWidth = 266
+        this.spriteHeight = 188
+        this.width = this.spriteWidth / 4
+        this.height = this.spriteHeight / 4
+        this.frame = 0
+        this.flapSpeed = 2
+        this.y = 0
+        this.targetY = 400
+  }
+  update(){
+    // if(this.x - this.width < 1000){ // on screen
+    //     this.onScreen = true
+    // }
+    if( this.x + this.width < 0) this.markedForDeletion = true;
+        this.frame > 4 ? this.frame = 0 : this.frame++;
+    this.y+= (this.targetY - this.y) / 50
+    this.x += 5
+  }
+  draw(context){
+    context.drawImage(this.image, this.frame * this.spriteWidth, 0, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height)
+  }
 
-export {Enemy, Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, NewShip5, Alien, Aliencu};
+}
+
+class Meteor {
+    constructor(game){
+        this.game = game
+        this.x = 900
+        this.y = Math.random() * 500
+        this.image = document.getElementById("tempMeteor")
+        this.speed = 5
+        this.width = 64
+        this.height = 64
+        this.speedY =  Math.random() * (2 - -2) + -2
+
+    }
+    update(){
+        this.x -= this.speed
+        this.y -= this.speedY
+        if( this.x + this.width < 0) this.markedForDeletion = true;
+    }
+    draw(context){
+        context.drawImage(this.image, this.x, this.y, this.width, this.height)
+    }
+
+}
+
+
+export {Enemy, Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, NewShip5, Alien, Aliencu, SprayShip, AlienTarget, Meteor, ShipY, RevengeShip};
 
 
 
