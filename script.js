@@ -1,6 +1,6 @@
 import Player from "./player.js"
 import UI from "./ui.js"
-import { Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, Alien, Aliencu, NewShip5, SprayShip, AlienTarget, Meteor, ShipY,RevengeShip} from "./enemy.js"
+import { Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, Alien, Aliencu, NewShip5, SprayShip, AlienTarget, Meteor, ShipY,RevengeShip, AlienBu,} from "./enemy.js"
 import InputHandler from "./input.js"
 import { Background, Layer} from "./background.js"
 
@@ -192,6 +192,10 @@ window.addEventListener('load', function(){
             this.invertedCount = 0
             this.cope.push(new SprayShip (this, 200 + 850, 200, 1, "type0"))
             this.cope.push(new AlienTarget(this, 200, 1, "type1"))
+            this.cope.push(new AlienBu(this, 0))
+            this.cope.push(new AlienBu(this, 100))
+            this.cope.push(new AlienBu(this, 200))
+            this.cope.push(new AlienBu(this, 300))
             this.cope.push(new ShipY (this, 200, 0, 1, "type0"))
             this.cope.push(new ShipY (this, 250, 500, -1, "type0"))
             this.cope.push(new RevengeShip(this,700, 100, 1, "vengeful" ))

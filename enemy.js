@@ -48,9 +48,8 @@ export default  class Enemy {
         // if(this.inversion === -1){
         //     console.log(this.id)
         // }
-        if(this.specialMessage){
-            console.log(`I am here at x: ${this.x}, y: ${this.y}, id: {this.id}`)
-            console.log(this.x)
+        if(this.hasExhaust){
+            this.exhaustFrame > 3 ? this.exhaustFrame = 0 : this.exhaustFrame++;
         }
  
     }
@@ -61,6 +60,9 @@ export default  class Enemy {
             context.drawImage(this.image, this.x, this.y, this.width, this.height)
         }else{
         context.drawImage(this.image,this.frameX * this.width,this.frameY *  this.height, this.width, this.height, this.x, this.y, this.width, this.height)
+        }
+        if(this.hasExhaust){
+            context.drawImage(this.exhaustImage, (this.exhaustFrame + this.frameOffset) * this.exhaustspWidth, 0, this.exhaustspWidth, this.exhaustspHeight, this. x - this.exhaustXOffset, this.y - this.exhaustYOffset, this.exhaustWidth, this.exhaustHeight)
         }
 
         if (this.game.debug){
@@ -185,7 +187,17 @@ class NewShip extends Enemy {
        this.isShooting = Math.floor(Math.random() * 2)
        this.hasParts = true
        this.parts = document.getElementById("ship2Part")
-       this.specialMessage = `I am here at x: ${this.x}, y: ${this.y}`
+       this.exhaustXOffset =  -this.width / 1.5
+       this.exhaustYOffset = -20
+       this.exhaustImage = document.getElementById("ship2Exhaust")
+       this.exhaustWidth = 32
+       this.exhaustHeight = 32
+       this.exhaustspWidth = 32
+       this.exhaustspHeight = 32
+       this.exhaustFrame = 0
+       this.maxExhaustFrame = 3
+       this.frameOffset = 0
+       this.hasExhaust = true
        
     }
 }
@@ -214,6 +226,17 @@ class NewShip5 extends Enemy {
        this.isShooting = 1
        this.hasParts = true
        this.parts = document.getElementById("ship5Part")
+       this.exhaustXOffset =  -this.width / 1.5
+       this.exhaustYOffset = -20
+       this.exhaustImage = document.getElementById("ship5Exhaust")
+       this.exhaustWidth = 32
+       this.exhaustHeight = 32
+       this.exhaustspWidth = 32
+       this.exhaustspHeight = 32
+       this.exhaustFrame = 0
+       this.maxExhaustFrame = 3
+       this.frameOffset = 0
+       this.hasExhaust = true
        
     }
 }
@@ -238,6 +261,17 @@ class SprayShip extends Enemy {
         this.score = 10
         this.bing = 1
         this.sprayCount = 8
+        this.exhaustXOffset =  -this.width  + 15
+        this.exhaustYOffset = -35
+        this.exhaustImage = document.getElementById("ship3Exhaust")
+        this.exhaustWidth = 32
+        this.exhaustHeight = 32
+        this.exhaustspWidth = 32
+        this.exhaustspHeight = 32
+        this.exhaustFrame = 0
+        this.maxExhaustFrame = 3
+        this.frameOffset = 0
+        this.hasExhaust = true
 
 
 
@@ -253,6 +287,9 @@ class SprayShip extends Enemy {
         if(this.frameX < this.maxFrame){
             this.frameX++
         }else this.frameX = 0
+        if(this.hasExhaust){
+            this.exhaustFrame > 3 ? this.exhaustFrame = 0 : this.exhaustFrame++;
+        }
         if(this.isShooting >= 1){
             if(this.shootTimer > this.shootInterval){
                 if(this.yShot < -10){
@@ -270,8 +307,7 @@ class SprayShip extends Enemy {
                 }
             }
         }
-        // console.log(this.yShot)
-        // console.log(this.xShot)
+  
     }
     shootProjectile(){
         this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 ,this.xShot, this.yShot, 1))
@@ -323,6 +359,17 @@ class RevengeShip extends Enemy {
         this.isShooting = 0
         this.onScreen = false
         this.vengeful = true
+        this.exhaustXOffset =  -this.width / 1.5
+        this.exhaustYOffset = -20
+        this.exhaustImage = document.getElementById("vengeExhaust")
+        this.exhaustWidth = 64
+        this.exhaustHeight = 64
+        this.exhaustspWidth = 64
+        this.exhaustspHeight = 64
+        this.exhaustFrame = 0
+        this.maxExhaustFrame = 3
+        this.frameOffset = 0
+        this.hasExhaust = true
     }
 
 
@@ -544,6 +591,57 @@ class Aliencu{
 
 }
 
+let gameFrame = 0
+
+class AlienBu {
+    constructor(game, angleOffset){
+        this.game = game
+        this.image = new Image()
+        this.image.src = 'assets/enemy3.png'
+        this.speed = Math.random() * 4 + 1
+        this.spriteWidth = 218
+        this.spriteHeight = 177
+        this.width = this.spriteWidth / 3
+        this.height = this.spriteHeight / 3
+        this.x = Math.random() * 2
+        this.y = Math.random() * 2
+        this.Xorigin = 300
+        this.Yorigin = 300
+        this.frame = 0
+        this.flapSpeed = 3
+        this.angle = 0
+        this.angleSpeed = 2.5
+        this.angleOffset = angleOffset
+        console.log(this.angleOffset)
+        this.yFlight = 0
+        this.xFlight = 0
+        this.lives = 2
+        this.score = 2
+        this.markedForDeletion = false
+        //this.curve = Math.random() * 200 + 4
+
+    }
+    update(){
+        this.x = 80 * Math.sin((this.angle + this.angleOffset) * Math.PI/200) + (this.Xorigin - this.width / 2) + this.xFlight
+        this.y = 80 * Math.cos((this.angle + this.angleOffset) * Math.PI/200) + (this.Yorigin - this.height / 2) + this.yFlight
+        this.angle += this.angleSpeed
+        this.yFlight += 0
+        this.xFlight += 0
+        console.log(this.x)
+        if( this.x + this.width < 0) this.markedForDeletion = true;
+        //animate sprites
+   
+            this.frame > 4 ? this.frame = 0 : this.frame++;
+        
+
+    }
+    draw(context){
+      context.drawImage(this.image, this.frame * this.spriteWidth, 0, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height)
+    }
+}
+
+
+
 class Meteor {
     constructor(game){
         this.game = game
@@ -554,6 +652,8 @@ class Meteor {
         this.width = 64
         this.height = 64
         this.speedY =  Math.random() * (2 - -2) + -2
+        this.lives = 2
+        this.score = 2
 
     }
     update(){
@@ -568,7 +668,7 @@ class Meteor {
 }
 
 
-export {Enemy, Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, NewShip5, Alien, Aliencu, SprayShip, AlienTarget, Meteor, ShipY, RevengeShip};
+export {Enemy, Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, NewShip5, Alien, Aliencu, SprayShip, AlienTarget, Meteor, ShipY, RevengeShip, AlienBu};
 
 
 
