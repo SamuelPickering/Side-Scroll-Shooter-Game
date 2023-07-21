@@ -10,7 +10,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: blue;
+    /* background: blue; */
     max-width: 100%;
     max-height: 100%;
     font-family: 'Bangers', cursive;
@@ -19,6 +19,7 @@
 }
 
 #layer1, #layer2, #layer3, #layer4, #player, #angler1, #angler2, 
-#lucky, #gears, #projectile, #hivewhale, #drone, #shipUp, #testtymap, #alientest, #explosion, #ship2, #shipY  {
+#lucky, #gears, #projectile, #hivewhale, #drone, #shipUp, #testtymap, #alientest, #explosion, #ship2, #ship3, #shipY, #ship5, #shipUp, #tempMeteor
+, #revengeShip #ship2Exhaust, #ship3Exhaust, #ship5Exhaust, #ship6Exhaust, #vengeExhaust, #revengeShip, #ship2Part, #ship5Part, #playerexhaust, #slash, #explosion2 {
     display: none;
 }

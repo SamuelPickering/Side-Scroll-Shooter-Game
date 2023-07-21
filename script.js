@@ -1,6 +1,7 @@
-import Player from "./player.js"
+import {Player, GigaPlayer} from "./player.js"
 import UI from "./ui.js"
-import { Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, Alien, Aliencu, NewShip5, SprayShip, AlienTarget, Meteor, ShipY,RevengeShip} from "./enemy.js"
+import { Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, Alien, Aliencu, NewShip5, SprayShip, AlienTarget, Meteor, ShipY,RevengeShip, SummonedRevengeShip, AlienBu, AlienBuPoint, AlienBuCircle, HorseMiniBoss, HomingMissle, WhaleBoss1, WhaleBoss11, WhaleBoss12, Boss3, Boss4, ShootingBall, DamagingExplosion, ShipMini, Ship4, MultiShotShip, AlienGroup} from "./enemy.js"
+import { spawnCu5, spawnCu6, spawnCu7 } from "./group spawners.js"
 import InputHandler from "./input.js"
 import { Background, Layer} from "./background.js"
 
@@ -18,8 +19,16 @@ window.addEventListener('load', function(){
     // let this.cope = []
     // i is increased by 220 bc there are 220 tiles
     let tileAmount = 220
-    for(let i = 0; i < shipped.length; i+= tileAmount){
-        shipMap.push(shipped.slice(i, i + tileAmount))
+    let Level1TileAmount = 250
+    let Level2TileAmount = 400
+    // for(let i = 0; i < shipped.length; i+= tileAmount){
+    //     shipMap.push(shipped.slice(i, i + tileAmount))
+    // }
+    // for(let i = 0; i < Level1.length; i+= Level1TileAmount){
+    //     shipMap.push(Level1.slice(i, i + Level1TileAmount))
+    // }
+       for(let i = 0; i < Level2.length; i+= Level2TileAmount){
+        shipMap.push(Level2.slice(i, i + Level2TileAmount))
     }
     console.log(shipMap)
 
@@ -36,8 +45,9 @@ window.addEventListener('load', function(){
     let inversioncount = 0
     let gamesong = new Audio()
     gamesong.src = "assets/Lovely VGM 522 - Command & Conquer_ Tiberian Sun - Scouting.mp3"
-    gamesong.currentTime = 1
-    gamesong.play();
+    // gamesong.src = "assets/Unholy Ambush.mp3"
+    gamesong.currentTime = 0
+    // gamesong.play();                                   //UN COMMENT FOR SOUND
     let songtimer = 0
     function musicUpdate( songtimer, deltaTime, gamesong){
         songtimer += deltaTime
@@ -130,7 +140,7 @@ window.addEventListener('load', function(){
             }
         }
         draw(context){
-            context.drawImage(this.image, this.frameX * this.spriteWidth , 0, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height)
+            context.drawImage(this.image, this.frameX * this.spriteWidth , 0, this.spriteWidth , this.spriteHeight , this.x, this.y, this.width , this.height )
         }
     }
 
@@ -157,45 +167,85 @@ window.addEventListener('load', function(){
 
 
     }
+    
     class Game {
         constructor(width, height){
             this.width = width
             this.height = height
             this.background = new Background(this)
-            this.player = new Player(this);
+            // this.player = new Player(this);
+            this.player = new GigaPlayer(this);
             this.input =  new InputHandler(this)
             this.ui = new UI(this)
             this.keys = []
             this.enemies = [new Alien(this)]
+            this.enemySpawners = []
             this.enemyProjectiles = []
             this.particles = []
             this.explosions = []
             this.powerUps = []
             this.obstacles = []
-            this.enemyTimer = 0
-            this.enemyInterval = 1000;
-            this.offset = 0
-            this.ammo = 20
-            this.maxAmmo = 50
+            this.warnings = []
+            this.meteorTimer = 0
+            this.meteorInterval = 400;
+            // this.meteorSpawn = true
+            this.offset =   0
+            this.ammo = 1
+            this.maxAmmo = 2
             this.ammoTimer = 0
             this.ammoInterval = 500
             this.gameOver = false;
             this.paused = false
             this.score = 0
-            this.winningScore = 50
+            this.winningScore = 5000
             this.gameTime = 0
-            this.timeLimit = 85000
+            this.timeLimit = 145000
             this.speed = 1
             this.debug = false
             this.cope = []
             this.notInvertedCount = 0
             this.invertedCount = 0
-            this.cope.push(new SprayShip (this, 200 + 850, 200, 1, "type0"))
-            this.cope.push(new AlienTarget(this, 200, 1, "type1"))
-            this.cope.push(new ShipY (this, 200, 0, 1, "type0"))
-            this.cope.push(new ShipY (this, 250, 500, -1, "type0"))
-            this.cope.push(new RevengeShip(this,700, 100, 1, "vengeful" ))
-            this.obstacles.push(new Meteor(this))
+            this.bossLevel = true
+            // this.cope.push(new Aliencu (this, 0, 400, "type8", 1, 1))
+            // this.cope.push(new Aliencu (this, 1200 + 32 * 2, 40, "type5", 1, 0))
+            // this.cope.push(new Aliencu (this, 1200 + 32 * 4, 40, "type5", 1, 0))
+
+            // this.cope.push(new Aliencu (this, -200, 440, "type6", -1, 0))
+            // this.cope.push(new Aliencu (this, -200 + 32 * 2, 440, "type6", -1, 0))
+            // this.cope.push(new Aliencu (this, -200 + 32 * 4, 440, "type6", -1, 0))
+            // this.cope.push(new Aliencu (this, 1000  + 32 * 6, 40, "type5", 1, 0))
+
+            // this.cope.push(new SprayShip (this,  + 550, 200, 1, "type0"))
+            // this.cope.push(new WhaleBoss12(this, 750, 200,))                       //WhaleBoss
+            // this.cope.push(new Boss3(this, 650, 250,))   ///     remember this
+            this.cope.push(new Boss4 (this, 650, 250 ))
+            // this.cope.push(new WhaleBoss12(this))
+            // this.cope.push(new ShootingBall(this, 500, 100, 240, 70))                      
+            // this.cope.push(new HorseMiniBoss(this,800, 100, 1, "type0" ))
+            // this.cope.push(new AlienTarget(this, 200, 1, "type1"))
+            // this.cope.push(new AlienBuCircle(this, 0))
+            // this.cope.push(new AlienBuCircle(this, 100))
+            // this.cope.push(new AlienBu(this, 700,200))
+            // this.cope.push(new AlienBuPoint(this, 500,200))
+            // this.cope.push(new AlienBuPoint(this, 500,300))
+            // this.cope.push(new AlienBuPoint(this, 500,400))
+            // this.cope.push(new AlienBuPoint(this, 800,200))
+            // this.cope.push(new AlienBuPoint(this, 800,400))
+            // this.cope.push(new AlienBu (this, 0, 400, "type2"))
+            // this.cope.push(new AlienBuCircle(this, 300))
+            // this.cope.push(new ShipY (this, 200, 0, 1, "type0"))
+            // this.cope.push(new ShipY (this, 250, 500, -1, "type0"))
+            // this.cope.push(new NewShip5(this,750, 200, 1, "type0"))
+            // this.cope.push(new Ship4(this, 500, 200, 1))
+            // this.cope.push(new RevengeShip(this,700, 100, 1, "vengeful" ))
+            // this.obstacles.push(new Meteor(this))
+            // this.cope.push(new ShipMini(this, 400, 200, 1, "type0", 1) )
+            // (game, x, y, inversion, type, id)
+            // this.cope.push(new Aliencu(this, 200, 250, "type2", -1))
+            // this.cope.push(new Aliencu(this, 400, 250, "type2", 1))
+            // this.cope.push(new Aliencu(this, 600, 250, "type2", -1))
+            // this.cope.push(new Aliencu(this, 800, 250, "type2", 1))
+            // this.cope.push(new MultiShotShip(this, 900, 200))
 
         }
 
@@ -220,13 +270,16 @@ window.addEventListener('load', function(){
                 projectile.update(deltaTime)
                 if (this.checkCollisons2(this.player, projectile)){
                     projectile.markedForDeletion = true
-                    if(!this.debug){
+                    if(!this.debug && !this.player.invulnerable){
                     this.player.lives--              // for now we are popping not shifting
+                    this.player.invulnerable = true
+                    if(this.player.ships){
                     if(this.player.ships.length > 1){
                     this.player.shipsLeft.push(this.player.ships.pop())
-                    }
+                    } }
                   }
                 }
+                projectile.screenfilter()
 
             })
             this.enemyProjectiles= this.enemyProjectiles.filter(projectile => !projectile.markedForDeletion )
@@ -234,17 +287,20 @@ window.addEventListener('load', function(){
             this.cope.forEach(enemy => {
                 enemy.update(deltaTime);
                 if (this.checkCollisons2(this.player, enemy)){
-                   enemy.markedForDeletion = true
-                   if(!this.debug){
+                   if(!enemy.boss)enemy.markedForDeletion = true
+                   if(!this.debug && !this.player.invulnerable){
                     this.player.lives--
+                    this.player.invulnerable = true
+                    if(this.player.ships){
                     if(this.player.ships.length > 1){
                         this.player.shipsLeft.push(this.player.ships.pop())
-                        }
+                        } }
                     }
                    if(enemy.type === "lucky") this.player.enterPowerUp() 
                    else{ 
                     if(!this.gameOver) this.score-- ;     }                    
                 }
+
                
 
 
@@ -258,6 +314,10 @@ window.addEventListener('load', function(){
                     // if(enemy.hasParts){
                     // this.particles.push(new Particle(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5, enemy.parts))
                     // }
+                    if(enemy.boss){
+                        enemy.damaged = true
+                        enemy.damagedTimer = 0
+                    }
                     if (enemy.lives <= 0){
                         if(enemy.type === "vengeful"){
                             enemy.vengeShot()
@@ -279,7 +339,24 @@ window.addEventListener('load', function(){
                     }
                 }
                })
+
+               if(this.bossLevel === true){
+                this.obstacles.forEach((obs) => {
+                    if(!enemy.boss){
+                    if(this.checkCollisons(obs, enemy)){
+                        if(enemy.type === "vengeful"){
+                            enemy.vengeShot()
+                        }
+                        enemy.markedForDeletion = true;
+                        this.addExplosion(enemy)
+                    }
+                    }
+                })
+
+                }
+               
             })
+            this.enemySpawners.forEach(spawner => spawner.update())
             this.powerUps.forEach(power => {
                 if (this.checkCollisons(this.player, power)){
                     power.markedForDeletion = true
@@ -287,24 +364,57 @@ window.addEventListener('load', function(){
                     this.player.shootyint = 0
                 }
             })
+            this.obstacles.forEach(obs => {
+                if(this.checkCollisons2(this.player, obs)){
+                    if(obs.hasAfterMath) obs.afterMath()
+                    if(obs.killable) obs.markedForDeletion = true
+                    if(!this.debug && !this.player.invulnerable){
+                        this.player.lives--
+                        this.player.invulnerable = true
+                        if(this.player.ships){
+                        if(this.player.ships.length > 1){
+                            this.player.shipsLeft.push(this.player.ships.pop())
+                            } }
+                        }
+                
+                }
+
+                this.player.projectiles.forEach(projectile => {
+                    if(obs.rotating){
+                        this.rectanglesIntersect(projectile, obs)
+                    }else {
+                    if(!obs.passthrough){
+                    if(this.checkCollisons(projectile, obs)){
+                        obs.lives-= projectile.damage
+                        if(!projectile.piercing) projectile.markedForDeletion = true
+                        if(obs.lives <= 0){
+                            obs.markedForDeletion = true
+                            if(obs.hasAfterMath) obs.afterMath()
+                        }
+                    }
+                    }
+                }
+            })
+            
+        })
             // replacing instances of enemies array with cope ship
             this.cope = this.cope.filter(enemy => !enemy.markedForDeletion)
+            this.enemySpawners = this.enemySpawners.filter(spawner => !spawner.markedForDeletion)
             this.powerUps.forEach(power => {power.update()})
             this.powerUps = this.powerUps.filter(power => !power.markedForDeletion)
-            this.obstacles.forEach(obs => obs.update())
-            if( this.enemyTimer > this.enemyInterval && !this.gameOver){
-                this.addEnemy()
-                this.enemyTimer = 0
-            }else {
-                this.enemyTimer += deltaTime
-            }
-             songtimer = musicUpdate(songtimer, deltaTime, gamesong)
+            this.obstacles = this.obstacles.filter(obs => !obs.markedForDeletion)
+            this.obstacles.forEach(obs => obs.update(deltaTime))
+            this.warnings =  this.warnings.filter(warning => !warning.markedForDeletion)
+            this.warnings.forEach(warning => warning.update(deltaTime))
+            if(this.meteorSpawn) this.addMeteor(deltaTime)
+
+            //  songtimer = musicUpdate(songtimer, deltaTime, gamesong)
             // console.log(this.enemyProjectiles)
 
         }
         draw(context){
             this.background.draw(context)
-            this.ui.draw(context)
+            this.warnings.forEach(warning => warning.draw(context))
             this.player.draw(context)
             this.particles.forEach(particle => particle.draw(context))
             this.powerUps.forEach(power => power.draw(context))
@@ -314,19 +424,25 @@ window.addEventListener('load', function(){
             })
             this.explosions.forEach(explosion => explosion.draw(context))
             this.enemyProjectiles.forEach(proj => proj.draw(context))
+            // context.fillRect(1000 - 100/2,100, 100, 30 )
+            // context.fillRect(1000 - 100,200, 100, 30 )
+            // context.fillRect(980 ,300, 100, 30 )
+            // context.fillRect(1000 + 100/2,400, 100, 30 )
+            // context.fillRect(800,450, 100, 30 )
+            this.ui.draw(context)
 
 
 
         }
-        addEnemy(){
-            const randomize = Math.random();
-            if(randomize < 0.3) this.enemies.push(new Angler1(this))
-            else if (randomize < 0.6) this.enemies.push(new LuckyFish(this))
-            else if (randomize < 0.8) this.enemies.push(new HiveWhale(this))
-            else this.enemies.push(new Angler2(this))
+        addMeteor(deltaTime){
+            if(this.meteorTimer > this.meteorInterval){
+            this.obstacles.push(new Meteor(this))
+            this.meteorTimer = 0
+            } else this.meteorTimer += deltaTime
         }
         addExplosion(enemy){
-            this.explosions.push(new Explosion(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5))
+            this.explosions.push(new Explosion(this, enemy.x + enemy.width * 0.5, enemy.y + enemy.height * 0.5 ))
+            // this.explosions.push(new Explosion(this, enemy.x + enemy.width * 0.5, 200 ))
         }
         checkCollisons(rect1, rect2){
            
@@ -340,9 +456,28 @@ window.addEventListener('load', function(){
            
             return ( rect1.x2 < rect2.x + rect2.width &&
                     rect1.x2 + rect1.width > rect2.x &&
-                    rect1.y < rect2.y + rect2.height &&
-                    rect1.height + rect1.y > rect2.y) 
+                    rect1.y2 < rect2.y + rect2.height &&
+                    rect1.height + rect1.y2 > rect2.y) 
                           
+        }
+         rectanglesIntersect(rect1, rect2) {
+            function lineIntersects(line1Start, line1End, line2Start, line2End) {
+                let q1 = line1Start.cross(line2Start) * line1Start.cross(line2End);
+                let q2 = line1End.cross(line2Start) * line1End.cross(line2End);
+                return q1 <= 0 && q2 <= 0; }
+            rect2.calculateAxes()
+            let axes = [...rect1.axes, ...rect2.axes];
+    
+            for (let axis of axes) {
+                let rect1Projection = rect1.project(axis);
+                let rect2Projection = rect2.project(axis);
+    
+                if (!lineIntersects(rect1Projection.start, rect1Projection.end, rect2Projection.start, rect2Projection.end)) {
+                    return false;
+                }
+            }
+    
+            return true;
         }
         restartGame(){
             this.cope.splice(0, this.cope.length)
@@ -355,14 +490,14 @@ window.addEventListener('load', function(){
             this.particles = []
             this.explosions = []
             this.powerUps = []
-            this.ammo = 20
+            this.ammo = 1
             //  this.spawnEnemies()
             console.log(this.cope)
             this.player.restart()
             this.background.restart()
-            gamesong.currentTime = 1
-            gamesong.play();
-            songtimer = 0
+            // gamesong.currentTime = 1               // UNCOMMENT THIS STUFF OUT
+            // gamesong.play();
+            // songtimer = 0
             this.gameOver = false
             this.paused = false
             animate(0)
@@ -370,37 +505,93 @@ window.addEventListener('load', function(){
         }
         spawnEnemies(){
             
+            // shipMap.forEach((row, i) =>{
+            //     row.forEach((symbol, j) => {
+            //         if(symbol !== 0){
+            //             if(symbol === 1){
+                    
+            //                 console.log(j * 32)
+            //                 this.cope.push(new NewShip(this, j * 32,i * 32 , 1, "type0", this.invertedCount))
+            //                 console.log("this shit should be here" + " id = " + this.invertedCount)
+            //                 console.log( "" + j * 32 + "  "  + i * 32)
+            //                 console.log(this.cope)
+            //                 this.notInvertedCount++; }
+            //                 // }else if(symbol === 3){
+            //                 //     this.cope.push(new NewShip(this, j * 32,i * 32 , 1, "type1", this.notInvertedCount))
+            //                  if(symbol === 4){
+            //                     this.cope.push(new NewShip(this, j * 32,i * 32 , -1, "type1", this.invertedCount))
+            //                     // console.log("There should be one at " + j * 32 + "and" + i * 32 )
+            //                     this.invertedCount++
+        
+            //                 } else if (symbol === 6){
+            //                     this.cope.push(new NewShip5(this, j * 32, i * 32, 1, "type0"))
+            //                 }
+            //         }
+
+            //     })
+            // })
             shipMap.forEach((row, i) =>{
                 row.forEach((symbol, j) => {
-                    // console.log(j)
-                    if(symbol === 1){
-                    
-                    console.log(j * 32)
-                    this.cope.push(new NewShip(this, j * 32,i * 32 , 1, "type0", this.invertedCount))
-                    console.log("this shit should be here" + " id = " + this.invertedCount)
-                    console.log( "" + j * 32 + "  "  + i * 32)
-                    console.log(this.cope)
-                    this.notInvertedCount++; }
-                    // }else if(symbol === 3){
-                    //     this.cope.push(new NewShip(this, j * 32,i * 32 , 1, "type1", this.notInvertedCount))
-                     if(symbol === 4){
-                        this.cope.push(new NewShip(this, j * 32,i * 32 , -1, "type1", this.invertedCount))
-                        // console.log("There should be one at " + j * 32 + "and" + i * 32 )
-                        this.invertedCount++
-
-                    } else if (symbol === 6){
-                        this.cope.push(new NewShip5(this, j * 32, i * 32, 1, "type0"))
+                    if(symbol !== 0){
+                        if(symbol === 9){
+                            console.log("gottem")
+                            
+                            this.cope.push(new ShipMini(this, this.offset + j * 32,i * 32 , 1, "type0", this.invertedCount))
+                            console.log("this shit should be here" + " id = " + this.invertedCount)
+                            console.log( "" + j * 32 + "  "  + i * 32)
+                            console.log(this.cope)
+                            this.notInvertedCount++; }
+                            // }else if(symbol === 3){
+                            //     this.cope.push(new NewShip(this, j * 32,i * 32 , 1, "type1", this.notInvertedCount))
+                             if(symbol === "ok"){
+                                this.cope.push(new NewShip(this, j * 32,i * 32 , -1, "type1", this.invertedCount))
+                                // console.log("There should be one at " + j * 32 + "and" + i * 32 )
+                                this.invertedCount++
+        
+                            } else if (symbol === 6){
+                                this.cope.push(new Aliencu(this, this.offset + j * 32, i * 32, 1, "type0"))
+                            }else if (symbol === 1){
+                                this.cope.push(new NewShip(this, this.offset + j * 32,i * 32 , 1, "type0", this.invertedCount))
+                            } else if (symbol === 5){
+                                this.cope.push(new Aliencu(this, this.offset + j * 32, i * 32, 1, "type1"))
+                                console.log("ugh")
+                            } else if (symbol === 7){
+                                this.cope.push(new Aliencu(this, this.offset + j * 32, i * 32, -1, "type1"))
+                            }else if (symbol === 4){
+                                this.cope.push(new NewShip5(this, this.offset + j * 32, i * 32, 1, "type0"))
+                                console.log("yellow ship")
+                            }else if (symbol === 8){
+                                this.cope.push(new Ship4(this, this.offset + j * 32, i * 32, 1))
+                            }else if (symbol === 10){
+                                spawnGroup2(this, this.offset + j * 32, i * 32, 1, "type2", 6)
+                                console.log("Spawned a group 2 at : " + j * 32)
+                            }else if (symbol === 11){
+                                spawnGroup2(this, this.offset + j * 32, i * 32, -1, "type2", 6)
+                            }else if (symbol === 12){
+                                spawnGroup1(this, this.offset + j * 32, i * 32, "type2", 1, 6)
+                                console.log("Spawned group1 at : " + j * 32 + "y :" + i * 32)
+                            }else if (symbol === 13){
+                                spawnGroup1(this, this.offset + j * 32, i * 32,  "type2", -1, 6)
+                                console.log("Spawned group1 at : " + j * 32  + "y :" + i * 32 + "with inversion")
+                            }else if (symbol === 14){
+                                this.cope.push(new RevengeShip(this, this.offset + j * 32, i * 32, 1, "vengeful"))
+                            }else if(symbol === 15){
+                                this.cope.push(new MultiShotShip(this, this.offset + j * 32, i * 32))
+                            }else if (symbol === 16){
+                                spawnGroup1(this, this.offset + j * 32, i * 32, "type3", 1, 4)
+                            }
                     }
+
                 })
             })
             
-            this.cope.push(new Alien(this))
-            this.cope.push(new Aliencu(this, 2000 + 600, 1, "type1"))
-            this.cope.push(new Aliencu(this, 2000 + 650, 1, "type1"))
-            this.cope.push(new Aliencu(this, 2000 + 700, 1, "type1"))
-            this.cope.push(new Aliencu(this, 2000 + 750, 1, "type1"))
-            this.cope.push(new Aliencu(this,  2000 + 800 + 2000, 1, "type1"))
-            this.cope.push(new NewShip5(this, 2000 + 850, 200, 1, "type0"))
+            // this.cope.push(new Alien(this))
+            // this.cope.push(new Aliencu(this, 2000 + 600, 200, 1, "type1"))
+            // this.cope.push(new Aliencu(this, 2000 + 650, 200, 1, "type1"))
+            // this.cope.push(new Aliencu(this, 2000 + 700, 200, 1, "type1"))
+            // this.cope.push(new Aliencu(this, 2000 + 750, 200, 1, "type1"))
+            // this.cope.push(new Aliencu(this,  2000 + 800 + 2000, 200, 1, "type1"))
+            // this.cope.push(new NewShip5(this, 2000 + 850, 200, 1, "type0"))
             // this.cope.forEach(enemy => enemy.startOffset())
         }
         pause(){
@@ -411,7 +602,41 @@ window.addEventListener('load', function(){
 
     const game = new Game(canvas.width, canvas.height)
     // game.spawnEnemies()
+    // spawnGroup1(game, 1000, 350, "type2", 1, 6)
+    // spawnGroup1(game, 1000, 100, "type2", -1, 6)
+    function spawnGroup1(game, x, y, type, inversion, num){
+        // if(x > 3584 - this.offset)
+        let lastSpawn = 96 * (num - 1)
+        let currentCount = 0
+        for(let i = 0; i <= lastSpawn; i += 96 ){
+            let isShooting = currentCount % 2
+            if(type !== "type2" || x  < 3004 + game.offset) {isShooting = 0 ; console.log(x) }
+            // console.log(isShooting)
+            game.cope.push(new Aliencu(game, x + i, y, type, inversion, isShooting))
+            currentCount++
+        }
 
+    }
+    function spawnGroup2(game, x, y, inversion, type, num){
+        let lastSpawn = 96 * (num - 1)
+        let currentCount = 0
+        for(let i = 0; i <= lastSpawn; i += 96 ){
+            let isShooting = currentCount % 2
+            if(x < 3004 + game.offset) isShooting = 0
+            game.cope.push(new NewShip(game, x + i, y, inversion, type, 69))
+            currentCount++
+            console.log(type)
+        }
+
+    }
+    // spawnCu5(game, 1)
+    // game.enemySpawners.push(new AlienGroup(game, 500, 1, spawnCu5))
+    // game.enemySpawners.push(new AlienGroup(game, 500, 1, spawnCu6))
+    // game.enemySpawners.push(new AlienGroup(game, 2500, 1, spawnCu7))
+    // spawnGroup1(game, 1000, 250, "type2", 1, 6)
+    // spawnGroup2(game, 1100, 400, 1, "type2", 6)
+
+    
     let lasTime = 0
     //animation loop
     function animate(timeStamp){
@@ -423,6 +648,7 @@ window.addEventListener('load', function(){
         game.update(deltaTime)
     }
         game.draw(ctx)
+        // console.log(deltaTime)
          if (!game.gameOver) requestAnimationFrame(animate)
     }
     animate(0)

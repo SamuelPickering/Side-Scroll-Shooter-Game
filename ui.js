@@ -24,11 +24,11 @@ export default  class UI {
             let message1
             let message2
             if(this.game.score > this.game.winningScore){
-                message1 = "You Win!"
+                message1 = "You Win! Congratulations you won"
                 message2 = "Well done"
             } else {
-                message1 = "You Lost"
-                message2 = "Try again next time"
+                message1 = "You Lost "
+                message2 = "Try again next time "
             }
             context.font = "70px " + this.fontFamily;
             context.fillText(message1, this.game.width * 0.5, this.game.height * 0.5 - 40)
@@ -37,7 +37,7 @@ export default  class UI {
         }
         //ammo
         if (this.game.player.powerUp) context.fillStyle = "#ffffbd"
-        for(let i = 0; i < this.game.ammo; i++){
+        for(let i = 0; i < 20; i++){
             context.fillRect(20 + 5 * i,50,3,20)
         }
         context.restore()
