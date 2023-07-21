@@ -212,17 +212,7 @@ class NewShip extends Enemy {
        this.isShooting =   isShooting              //Math.floor(Math.random() * 2)
        this.hasParts = true
        this.parts = document.getElementById("ship2Part")
-       this.exhaustXOffset =  -this.width / 1.5 -12
-       this.exhaustYOffset = -48
-       this.exhaustImage = document.getElementById("ship2Exhaust")
-       this.exhaustWidth = 32
-       this.exhaustHeight = 32
-       this.exhaustspWidth = 32
-       this.exhaustspHeight = 32
-       this.exhaustFrame = 0
-       this.maxExhaustFrame = 3
-       this.frameOffset = 0
-       this.hasExhaust = true
+       this.specialMessage = `I am here at x: ${this.x}, y: ${this.y}`
        
     }
 }
@@ -295,6 +285,17 @@ class SprayShip extends Enemy {
         this.score = 10
         this.bing = 1
         this.sprayCount = 8
+        this.exhaustXOffset =  -this.width  + 15
+        this.exhaustYOffset = -35
+        this.exhaustImage = document.getElementById("ship3Exhaust")
+        this.exhaustWidth = 32
+        this.exhaustHeight = 32
+        this.exhaustspWidth = 32
+        this.exhaustspHeight = 32
+        this.exhaustFrame = 0
+        this.maxExhaustFrame = 3
+        this.frameOffset = 0
+        this.hasExhaust = true
         this.exhaustXOffset =  -this.width  + 15
         this.exhaustYOffset = -35
         this.exhaustImage = document.getElementById("ship3Exhaust")
@@ -2182,11 +2183,6 @@ class Meteor {
         this.frame = 0
         this.maxFrame = 4
         this.speedY =  Math.random() * (2 - -2) + -2
-        this.lives = 2
-        this.score = 2
-        this.killable = true
-        this.frameTimer = 0
-        this.frameInterval = 75
 
     }
     update(deltaTime){
@@ -2223,6 +2219,7 @@ class HiveProjectile {
     }
 }
 
+export {Enemy, Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, NewShip5, Alien, Aliencu, SprayShip, AlienTarget, Meteor, ShipY, RevengeShip};
 
 class HomingMissle {
     constructor(game, x, y, inversion, type=1){
