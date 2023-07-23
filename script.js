@@ -2,7 +2,8 @@ import {Player, GigaPlayer} from "./player.js"
 import UI from "./ui.js"
 import { Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, Alien, Aliencu, NewShip5, SprayShip, AlienTarget, Meteor, ShipY,RevengeShip, SummonedRevengeShip, AlienBu, AlienBuPoint, AlienBuCircle, HorseMiniBoss, HomingMissle, WhaleBoss1, WhaleBoss11, WhaleBoss12, Boss3, Boss4, ShootingBall, DamagingExplosion, ShipMini, Ship4, MultiShotShip, AlienGroup} from "./enemy.js"
 import { spawnCu5, spawnCu6, spawnCu7 } from "./group spawners.js"
-import InputHandler from "./input.js"
+// import InputHandler from "./input.js"
+import { InputHandler1 } from "./input.js"
 import { Background, Layer} from "./background.js"
 
 
@@ -44,8 +45,9 @@ window.addEventListener('load', function(){
     
     let inversioncount = 0
     let gamesong = new Audio()
-    gamesong.src = "assets/Lovely VGM 522 - Command & Conquer_ Tiberian Sun - Scouting.mp3"
+    // gamesong.src = "assets/Lovely VGM 522 - Command & Conquer_ Tiberian Sun - Scouting.mp3"
     // gamesong.src = "assets/Unholy Ambush.mp3"
+    gamesong.src = "assets/09 H.G. Virus.mp3"
     gamesong.currentTime = 0
     // gamesong.play();                                   //UN COMMENT FOR SOUND
     let songtimer = 0
@@ -175,7 +177,7 @@ window.addEventListener('load', function(){
             this.background = new Background(this)
             // this.player = new Player(this);
             this.player = new GigaPlayer(this);
-            this.input =  new InputHandler(this)
+            this.input =  new InputHandler1(this)
             this.ui = new UI(this)
             this.keys = []
             this.enemies = [new Alien(this)]
@@ -218,7 +220,7 @@ window.addEventListener('load', function(){
             // this.cope.push(new SprayShip (this,  + 550, 200, 1, "type0"))
             // this.cope.push(new WhaleBoss12(this, 750, 200,))                       //WhaleBoss
             // this.cope.push(new Boss3(this, 650, 250,))   ///     remember this
-            this.cope.push(new Boss4 (this, 650, 250 ))
+            // this.cope.push(new Boss4 (this, 650, 250 ))
             // this.cope.push(new WhaleBoss12(this))
             // this.cope.push(new ShootingBall(this, 500, 100, 240, 70))                      
             // this.cope.push(new HorseMiniBoss(this,800, 100, 1, "type0" ))
@@ -406,6 +408,7 @@ window.addEventListener('load', function(){
             this.obstacles.forEach(obs => obs.update(deltaTime))
             this.warnings =  this.warnings.filter(warning => !warning.markedForDeletion)
             this.warnings.forEach(warning => warning.update(deltaTime))
+            this.input.update()
             if(this.meteorSpawn) this.addMeteor(deltaTime)
 
             //  songtimer = musicUpdate(songtimer, deltaTime, gamesong)

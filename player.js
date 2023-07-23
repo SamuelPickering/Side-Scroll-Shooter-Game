@@ -288,6 +288,8 @@ class GigaPlayer {
         this.angle = 0
         this.axes = [];
         this.calculateAxes();
+        this.vx = 0
+        this.vy = 0
 
     }
     update(deltaTime){
@@ -314,6 +316,9 @@ class GigaPlayer {
            }
         this.x += this.speedX
         this.y += this.speedY
+        console.log(this.vx)
+        this.x += this.vx
+        this.y += this.vy
         this.projectiles.forEach(projectile => {
             projectile.update(deltaTime)
         })
@@ -457,6 +462,8 @@ class Projectile {
             this.image.height
 );
             context.restore();
+        }else if(this.image === document.getElementById("blue-ball")){
+            context.drawImage(this.image, this.x, this.y, this.width, this.height)
         }else{
         context.drawImage(this.image, this.x, this.y);
         }
@@ -594,7 +601,7 @@ class Aim extends Projectile {
         this.markedForDeletion = false
         this.rot = rot
         this.ang = ang
-        console.log( "this is ang"  + ang)
+        // console.log( "this is ang"  + ang)
         this.image = document.getElementById("projectile")
         this.va = 1 * 0.2 - 0.1  //rotation speed, velocity of angle
         this.xOrigin = this.x
@@ -610,13 +617,20 @@ class Aim extends Projectile {
 
 }
 class StaggeredAim extends Aim{
-    constructor(game, x, y, directionX, directionY, rot, ang, destinX,destinY ){
+    constructor(game, x, y, directionX, directionY, rot, ang, destinX,destinY, type=1, aimInterval=1000 ){
         super(game, x, y, directionX, directionY,rot,ang)
         this.destinX = destinX
         this.destinY = destinY
+        this.type = type
         this.point = 0
+        this.aimInterval = aimInterval
+        this.aimTimer = 0
+        this.aimed = false
+        
+        this.handleType()
     }
-    update(){
+    update(deltaTime){
+        if(this.type === 1){
         if(this.point < 50){
              this.x+= ((this.destinX + this.x) - this.x) / 70
              this.y-= ((this.destinY + this.y) - this.y) / 70
@@ -632,6 +646,38 @@ class StaggeredAim extends Aim{
             this.speed+= 4
             this.x = Math.cos(this.ang) * this.speed + this.xOrigin
             this.y = Math.sin(this.ang) * this.speed + this.yOrigin
+        }
+     }else if(this.type === 2){
+        if(!this.aimed){
+        this.y+= (this.destinY - this.y) / 30
+        this.x += (this.destinX - this.x) / 50
+        console.log("ves")
+        console.log(deltaTime)
+        if(this.aimTimer > this.aimInterval){
+            let tago = Math.atan2(this.game.player.y2 - this.y - this.height * 0.5, this.game.player.x2 - this.x)
+            if (tago < 0) { tago += 2 * Math.PI ; }
+            this.ang = tago
+            this.xOrigin = this.x
+            this.yOrigin = this.y
+            this.aimed = true
+        }else {this.aimTimer += deltaTime}
+     
+    }else {
+        console.log("we aiming")
+        this.speed+= 4
+        this.x = Math.cos(this.ang) * this.speed + this.xOrigin
+        this.y = Math.sin(this.ang) * this.speed + this.yOrigin
+     }
+
+    }
+
+    }
+
+    handleType(){
+        if(this.type === 2){
+            this.image = document.getElementById("blue-ball")
+            this.width = 25
+            this.height = 25
         }
     }
 }

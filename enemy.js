@@ -1327,7 +1327,7 @@ class Level1Boss extends HorseMiniBoss {
         super(game, x, y, inversion, type)
         this.minionSpawnTimer = 0
         this.minionSpawnInterval = 10000
-        this.angle
+        this.angle = 1 // i put 1 for no reason
     }
 }
 
@@ -2123,6 +2123,7 @@ class Level1Boss extends HorseMiniBoss {
             if(this.spawnExplosionTimer > this.spawnExplosionInterval){
                 // this.SummonRevengeShips()
                 this.spawnWarning()
+                this.ShootStaggeredAim()
                 this.spawnExplosionTimer = 0
             }else {this.spawnExplosionTimer += deltaTime}
             
@@ -2168,6 +2169,15 @@ class Level1Boss extends HorseMiniBoss {
             this.game.cope.push(new SummonedRevengeShip(this.game, this.x, this.y + this.height * 0.5, 1, "vengeful", 200, 25))
             this.game.cope.push(new SummonedRevengeShip(this.game, this.x, this.y + this.height * 0.5, 1, "vengeful", -50, -100))
             this.game.cope.push(new SummonedRevengeShip(this.game, this.x, this.y + this.height * 0.5, 1, "vengeful", -50, 100))
+        }
+        ShootStaggeredAim(){
+            console.log(StaggeredAim)
+            this.game.enemyProjectiles.push(new StaggeredAim(this.game, this.x, this.y + this.height * 0.5, 1, 0, 0, 0, 100, 100, 2, 2000))
+            this.game.enemyProjectiles.push(new StaggeredAim(this.game, this.x, this.y + this.height * 0.5, 1, 0, 0, 0, 200, 100, 2, 2500))
+            this.game.enemyProjectiles.push(new StaggeredAim(this.game, this.x, this.y + this.height * 0.5, 1, 0, 0, 0, 300, 100, 2, 2700))
+            this.game.enemyProjectiles.push(new StaggeredAim(this.game, this.x, this.y + this.height * 0.5, 1, 0, 0, 0, 100, 400, 2, 2000))
+            this.game.enemyProjectiles.push(new StaggeredAim(this.game, this.x, this.y + this.height * 0.5, 1, 0, 0, 0, 200, 400, 2, 2500))
+            this.game.enemyProjectiles.push(new StaggeredAim(this.game, this.x, this.y + this.height * 0.5, 1, 0, 0, 0, 300, 400, 2, 2700))
         }
     }
 
@@ -2219,7 +2229,7 @@ class HiveProjectile {
     }
 }
 
-export {Enemy, Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, NewShip5, Alien, Aliencu, SprayShip, AlienTarget, Meteor, ShipY, RevengeShip};
+
 
 class HomingMissle {
     constructor(game, x, y, inversion, type=1){
@@ -2333,7 +2343,7 @@ class DamagingExplosion {
             if(this.frame5Counter > this.frame5Interval){
                 this.frame++
                 this.frame5Counter = 0
-                console.log(this.frame)
+                // console.log(this.frame)
             } else this.frame5Counter += deltaTime
         }else {
         if(this.timer > this.spriteInterval){
