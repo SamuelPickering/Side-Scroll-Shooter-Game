@@ -412,6 +412,7 @@ window.addEventListener('load', function(){
             if(this.meteorSpawn) this.addMeteor(deltaTime)
 
             //  songtimer = musicUpdate(songtimer, deltaTime, gamesong)
+            if(transitionFade)BlackFadeUpdate(deltaTime)
             // console.log(this.enemyProjectiles)
 
         }
@@ -433,6 +434,7 @@ window.addEventListener('load', function(){
             // context.fillRect(1000 + 100/2,400, 100, 30 )
             // context.fillRect(800,450, 100, 30 )
             this.ui.draw(context)
+            if(transitionFade) BlackFadeDraw(context)
 
 
 
@@ -493,6 +495,8 @@ window.addEventListener('load', function(){
             this.particles = []
             this.explosions = []
             this.powerUps = []
+            this.obstacles = []
+            this.warnings = []
             this.ammo = 1
             //  this.spawnEnemies()
             console.log(this.cope)
@@ -503,8 +507,14 @@ window.addEventListener('load', function(){
             // songtimer = 0
             this.gameOver = false
             this.paused = false
-            animate(0)
+            // animate(0)
 
+        }
+        playBoss(num){
+            this.restartGame()
+            if(num === 2) this.cope.push(new WhaleBoss12(this, 750, 200,))                       //WhaleBoss
+            else if (num === 3) this.cope.push(new Boss3(this, 650, 250,))   ///     remember this
+            else if(num === 4) this.cope.push(new Boss4 (this, 650, 250 ))
         }
         spawnEnemies(){
             
@@ -638,9 +648,46 @@ window.addEventListener('load', function(){
     // game.enemySpawners.push(new AlienGroup(game, 2500, 1, spawnCu7))
     // spawnGroup1(game, 1000, 250, "type2", 1, 6)
     // spawnGroup2(game, 1100, 400, 1, "type2", 6)
+    let fadeOpacity = 0
+    let transitionFade = false
+    let Faded = false
+    let BlackFadeIncreaseTimer = 0
+    function BlackFadeUpdate(deltaTime){
+        if(!Faded){
+        if(BlackFadeIncreaseTimer > 30){
+            fadeOpacity += 0.03
+            BlackFadeIncreaseTimer = 0
+            if(fadeOpacity > 1){
+                Faded = true
+                // Level function
+            }
+        }else BlackFadeIncreaseTimer += deltaTime
+    } else {
+        if(BlackFadeIncreaseTimer > 30){
+            fadeOpacity -= 0.09
+            BlackFadeIncreaseTimer = 0
+            if(fadeOpacity <= 0){
+                Faded = false
+                transitionFade = false
+               
+            }
+        }else BlackFadeIncreaseTimer += deltaTime
+    }
+       
+    }
+    function BlackFadeDraw(context){
+        context.save()
+        context.fillStyle = "black"
+        context.globalAlpha = fadeOpacity
+        context.fillRect(0,0,1000,500)
+        context.restore()
+        console.log(fadeOpacity)
+    }
+
 
     
     let lasTime = 0
+    transitionFade = true
     //animation loop
     function animate(timeStamp){
         const deltaTime = timeStamp - lasTime

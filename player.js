@@ -279,7 +279,7 @@ class GigaPlayer {
         this.image = document.getElementById("playergiga")
         this.invulnerable = false
         this.iFrameCounter = 0
-        this.maxImmunity = 2200    //22500
+        this.maxImmunity = 22200    //22500
         this.lives = 3
         this.x2 = this.x  + 25
         this.y2 = this.y - 10
@@ -314,8 +314,8 @@ class GigaPlayer {
                this.y = -this.height * 0.5
                this.speedY = 0 
            }
-        this.x += this.speedX
-        this.y += this.speedY
+        // this.x += this.speedX
+        // this.y += this.speedY
         console.log(this.vx)
         this.x += this.vx
         this.y += this.vy

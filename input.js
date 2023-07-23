@@ -143,6 +143,9 @@ class InputHandler1 {
       if (e.code === "KeyS") this.down = true
       if (e.code === "Space") this.spacebarPressed = true
       if (e.code === "KeyP") this.game.pause();
+      if (e.code === "KeyJ") this.game.playBoss(2)
+      if (e.code === "KeyK") this.game.playBoss(3)
+      if (e.code === "KeyL") this.game.playBoss(4)
     });
 
     // Arrow function for keyup event listener
