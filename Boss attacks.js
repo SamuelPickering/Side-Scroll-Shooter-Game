@@ -85,3 +85,24 @@ if(this.phase === 2){
         this.staggerSpreadTimer += deltaTime
     }
 }
+
+
+
+
+// Bad tri shot spam
+
+
+if(this.triShotTimer > this.triShotInterval){
+    if(this.staggerTriTimer > this.staggerTriInterval){
+    this.shootTriShot(this.triShotLocationOffset)
+    this.triShotLocationOffset += 60 * this.triShotInversion
+    this.triAmount++
+    if(this.triAmount > 3){ 
+        this.triShotTimer = 0
+        // this.triShotLocationOffset = -140
+        this.triAmount = 0
+        this.triShotLocationOffset = -70
+    }
+    this.staggerTriTimer = 0
+    }else {this.staggerTriTimer+= deltaTime}
+}else {this.triShotTimer += deltaTime}

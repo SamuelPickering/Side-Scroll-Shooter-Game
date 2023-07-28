@@ -14,6 +14,8 @@ export default  class UI {
         context.font = this.fontSize + "px " + this.fontFamily
         //score
         context.fillText("Score: " +this.game.score,20,40)
+        context.fillText("Damage dealt: " + this.game.bossDamage, 20,140)
+        context.fillText("HP", 20,490)
 
         //timer
         const formattedTime = (this.game.gameTime * 0.001).toFixed(1)
@@ -39,6 +41,10 @@ export default  class UI {
         if (this.game.player.powerUp) context.fillStyle = "#ffffbd"
         for(let i = 0; i < 20; i++){
             context.fillRect(20 + 5 * i,50,3,20)
+        }
+        context.fillStyle = "#ff0000"
+        for(let i = 0; i < this.game.player.lives; i++){
+            context.fillRect( 50 + 20 + 5 * i,470,3,20)
         }
         context.restore()
     }

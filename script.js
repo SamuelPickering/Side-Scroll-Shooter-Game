@@ -15,6 +15,7 @@ window.addEventListener('load', function(){
     canvas.width = 1000
     canvas.height = 500
     console.log(shipped)
+    ctx.imageSmoothingEnabled = false;
 
     const shipMap = []
     // let this.cope = []
@@ -48,6 +49,7 @@ window.addEventListener('load', function(){
     // gamesong.src = "assets/Lovely VGM 522 - Command & Conquer_ Tiberian Sun - Scouting.mp3"
     // gamesong.src = "assets/Unholy Ambush.mp3"
     gamesong.src = "assets/09 H.G. Virus.mp3"
+    // gamesong.src = "assets/13 Adam.mp3"
     gamesong.currentTime = 0
     // gamesong.play();                                   //UN COMMENT FOR SOUND
     let songtimer = 0
@@ -185,6 +187,7 @@ window.addEventListener('load', function(){
             this.enemyProjectiles = []
             this.particles = []
             this.explosions = []
+            this.bossExplosions = []
             this.powerUps = []
             this.obstacles = []
             this.warnings = []
@@ -201,13 +204,14 @@ window.addEventListener('load', function(){
             this.score = 0
             this.winningScore = 5000
             this.gameTime = 0
-            this.timeLimit = 145000
+            this.timeLimit = 345000
             this.speed = 1
             this.debug = false
             this.cope = []
             this.notInvertedCount = 0
             this.invertedCount = 0
             this.bossLevel = true
+            this.bossDamage = 0
             // this.cope.push(new Aliencu (this, 0, 400, "type8", 1, 1))
             // this.cope.push(new Aliencu (this, 1200 + 32 * 2, 40, "type5", 1, 0))
             // this.cope.push(new Aliencu (this, 1200 + 32 * 4, 40, "type5", 1, 0))
@@ -320,7 +324,7 @@ window.addEventListener('load', function(){
                         enemy.damaged = true
                         enemy.damagedTimer = 0
                     }
-                    if (enemy.lives <= 0){
+                    if (enemy.lives <= 0 && !enemy.boss){
                         if(enemy.type === "vengeful"){
                             enemy.vengeShot()
                         }
@@ -337,7 +341,6 @@ window.addEventListener('load', function(){
                         }
                         
                         if(!this.gameOver)this.score += enemy.score
-                        if( this.score > this.winningScore) this.gameOver = true
                     }
                 }
                })
@@ -422,10 +425,11 @@ window.addEventListener('load', function(){
             this.player.draw(context)
             this.particles.forEach(particle => particle.draw(context))
             this.powerUps.forEach(power => power.draw(context))
-            this.obstacles.forEach(obs => obs.draw(context))
+            // this.obstacles.forEach(obs => obs.draw(context))
             this.cope.forEach(enemy => {
                 enemy.draw(context)
             })
+            this.obstacles.forEach(obs => obs.draw(context))
             this.explosions.forEach(explosion => explosion.draw(context))
             this.enemyProjectiles.forEach(proj => proj.draw(context))
             // context.fillRect(1000 - 100/2,100, 100, 30 )
@@ -498,23 +502,42 @@ window.addEventListener('load', function(){
             this.obstacles = []
             this.warnings = []
             this.ammo = 1
+            let wasGameOver = false
+            if(this.gameOver){wasGameOver = true }
             //  this.spawnEnemies()
             console.log(this.cope)
             this.player.restart()
             this.background.restart()
-            // gamesong.currentTime = 1               // UNCOMMENT THIS STUFF OUT
-            // gamesong.play();
+            gamesong.currentTime = 1               // UNCOMMENT THIS STUFF OUT
+            gamesong.play();
             // songtimer = 0
             this.gameOver = false
             this.paused = false
-            // animate(0)
+            if(wasGameOver) animate(0)
 
         }
         playBoss(num){
             this.restartGame()
-            if(num === 2) this.cope.push(new WhaleBoss12(this, 750, 200,))                       //WhaleBoss
-            else if (num === 3) this.cope.push(new Boss3(this, 650, 250,))   ///     remember this
-            else if(num === 4) this.cope.push(new Boss4 (this, 650, 250 ))
+            if(num === 2){ 
+                this.cope.push(new WhaleBoss12(this, 750, 200,))   
+                gamesong.src = "assets/13 Adam.mp3"
+                gamesong.currentTime = 1               
+                gamesong.play()
+            }                    //WhaleBoss
+            else if (num === 3){ 
+                this.cope.push(new Boss3(this, 650, 250,))
+                gamesong.src = "assets/09 H.G. Virus.mp3"
+                gamesong.currentTime = 1               
+                gamesong.play()
+            }   ///     remember this
+            else if(num === 4) {this.cope.push(new Boss4 (this, 650, 250 ))
+                gamesong.src = "assets/Unholy Ambush.mp3"
+                gamesong.currentTime = 1               
+                gamesong.play() }
+        }
+        stopMusic(){
+            gamesong.pause()
+            gamesong.currentTime = 1
         }
         spawnEnemies(){
             
@@ -685,9 +708,10 @@ window.addEventListener('load', function(){
     }
 
 
+
     
     let lasTime = 0
-    transitionFade = true
+    transitionFade = false
     //animation loop
     function animate(timeStamp){
         const deltaTime = timeStamp - lasTime

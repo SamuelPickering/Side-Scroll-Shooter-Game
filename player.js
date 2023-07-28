@@ -144,7 +144,7 @@
         if(this.powerUp){
             this.shootBottom()
         }
-        this.releaseBomb()
+        // this.releaseBomb()
         
     }
     shootBottom(){
@@ -290,6 +290,7 @@ class GigaPlayer {
         this.calculateAxes();
         this.vx = 0
         this.vy = 0
+        this.damaged = false
 
     }
     update(deltaTime){
@@ -316,7 +317,7 @@ class GigaPlayer {
            }
         // this.x += this.speedX
         // this.y += this.speedY
-        console.log(this.vx)
+        
         this.x += this.vx
         this.y += this.vy
         this.projectiles.forEach(projectile => {
@@ -348,13 +349,22 @@ class GigaPlayer {
     }
 
     draw(context){
+        // context.imageSmoothingEnabled = false
         context.save()
         if(this.invulnerable){
+            console.log("ok")
             context.fillRect(this.x2,this.y2, this.width, this.height)
             context.globalAlpha = 0.5
         }
+        context.fillStyle = "Red"
+        context.fillRect(this.x2, this.y2, this.width, this.height)
         if(this.game.debug) context.strokeRect(this.x2, this.y2, this.width, this.height)
-        context.drawImage(this.image, this.x, this.y, this.spriteWidth, this.spriteHeight)
+        context.drawImage(this.image, this.x, this.y, this.spriteWidth  , this.spriteHeight  )
+        // context.fillRect(this.x2, this.y2, this.width, this.height)
+        
+        
+        context.restore()
+        context.save()
         this.projectiles.forEach(projectile => {
             projectile.draw(context)
         })
@@ -363,13 +373,13 @@ class GigaPlayer {
     }
 
     shootTop(){
-        console.log( "ShootTop: " + this.shootTimer)
+        // console.log( "ShootTop: " + this.shootTimer)
         if(this.shootTimer > this.shootInterval){
         this.projectiles.push(new Projectile(this.game, this.x + 70, this.y + 70, 1, 0,6))
         this.projectiles.push(new Projectile(this.game, this.x + 70, this.y + 50, 1, 0,6))
         this.shootTimer = 0
         
-        this.releaseBomb()
+        // this.releaseBomb()
         }
     }
 
@@ -574,10 +584,11 @@ class testEP extends Projectile {
 }
 
 class testEPCircle extends testEP {
-    constructor(game, x, y, directionX, directionY, rot, ang, spd){
+    constructor(game, x, y, directionX, directionY, rot, ang, spd, sizeMultiplier= 1){
         super(game, x, y, directionX, directionY, rot, ang, spd)
-        this.width = 25
-        this.height = 25
+        this.sizeMultiplier = sizeMultiplier
+        this.width = 25 * this.sizeMultiplier
+        this.height = 25 * this.sizeMultiplier
         this.image = document.getElementById("blue-ball")
         this.imageWidth = 91
         this.imageHeight = 90
@@ -670,6 +681,19 @@ class StaggeredAim extends Aim{
      }
 
     }
+
+    }
+    draw(context){
+
+        context.save()
+        //  context.filter = "contrast(90%) brightness(150%) saturate(200%) " //hue-rotate(0deg)";
+        if(this.image === document.getElementById("blue-ball")){
+            context.drawImage(this.image, this.x, this.y, this.width, this.height)
+        }else{
+        context.drawImage(this.image, this.x, this.y);
+        }
+
+        context.restore()
 
     }
 

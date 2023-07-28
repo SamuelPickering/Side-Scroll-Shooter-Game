@@ -1363,6 +1363,8 @@ class Level1Boss extends HorseMiniBoss {
             this.fakeI = this.stagbulletAmount
             this.damaged = false
             this.damagedTimer = 0
+            this.deathelapse = 0
+            this.currentAngle = 0
 
 
         }
@@ -1457,13 +1459,22 @@ class Level1Boss extends HorseMiniBoss {
         }
 
         draw(context){
+            if(this.lives > 0){
+            context.save()
+            context.imageSmoothingEnabled = true
+            if(this.damaged) context.filter = "grayscale(10%) saturate(4)";
             if(this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height)
             context.drawImage(this.image,this.frameX * this.width,this.frameY *  this.height, this.width, this.height, this.x, this.y, this.width, this.height)
-            // context.drawImage(this.image, this.x, this.y, this.width, this.height)
-            this.drawBossHealthBar(context, 450, 450, 200, 40, this.maxLives, this.lives)
-            if(this.damaged){
-                this.drawDamageAnimation(context, this.x, this.y, this.width, this.height)
-            }
+            context.restore()
+            context.save
+            this.drawBossHealthBar(context, 75, 450, 850, 30, this.maxLives, this.lives)
+            // if(this.damaged){
+            //     this.drawDamageAnimation(context, this.x, this.y, this.width, this.height)
+            // }
+            context.restore()
+        }else {
+            this.deathAnimationDraw(context)
+        }
     
         }
         drawBossHealthBar(context, x, y, width, height, maxHealth, currentHealth) {
@@ -1505,10 +1516,57 @@ class Level1Boss extends HorseMiniBoss {
           }
           damageCounter(deltaTime){
             this.damagedTimer+= deltaTime
-            this.damaged = this.damagedTimer > 70 ? false : true
+            this.damaged = this.damagedTimer > 50 ? false : true
           }
+          deathAnimationDrawUpdate(deltaTime){
+            const targetAngle = Math.PI / 4;
+            const tiltRate = targetAngle / 2;
+            this.deathelapse +=  deltaTime; 
+            if (this.deathelapse <= 4000) {
+              this.currentAngle = tiltRate * (this.deathelapse/ 1000);
+            } else {
+                this.markedForDeletion = true
+                this.game.stopMusic()
+            }
+            console.log(this.deathelapse)
+            if(this.y < 130)this.y += 0.5
+          }
+            
+          deathAnimationDraw(context) {
+            // Increment the elapsed time on each frame
+          
+            // Calculate the current angle based on the elapsed time and tilt rate
+          
+            context.save();
+          
+            const imageCenterX = this.x + this.width / 2;
+            const imageCenterY = this.y + this.height / 2;
+            context.translate(imageCenterX, imageCenterY);
+          
+            // Rotate the context by the current angle
+            context.rotate(this.currentAngle);
+          
+            // Draw the image at its new rotated position
+            context.drawImage(
+              this.image,
+              this.frameX * this.width,
+              this.frameY * this.height,
+              this.width,
+              this.height,
+              -this.width / 2,
+              -this.height / 2,
+              this.width,
+              this.height
+            );
+          
+            // Restore the context to its original state
+            context.restore();
+            if(this.deathelapse % 500 <= 17){ 
+                this.spawnExplosion( this.x + 40 + this.width * deathAnimationExplosionLocations[0].x * 0.5, this.y + 40 + this.height * deathAnimationExplosionLocations[0].y)
+                deathAnimationExplosionLocations.push(deathAnimationExplosionLocations.shift())
+            }
 
-
+            }
 
         // let off = num * 2                       The top circle
             
@@ -1554,6 +1612,9 @@ class Level1Boss extends HorseMiniBoss {
         spawnWarning(){
             this.game.warnings.push(new Warning(this.game, 300, 200, 128, 128, this.spawnExplosion, 300, 200))
             this.game.warnings.push(new Warning(this.game, 300, 350, 128, 128, this.spawnExplosion,300, 350))
+        }
+        updateDamageAmount(){
+            this.game.bossDamage =  this.lives - this.maxLives 
         }
 
         spawnExplosion(x, y){
@@ -1639,6 +1700,7 @@ class Level1Boss extends HorseMiniBoss {
             this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 ,-1, 0, 1))
             this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 ,-1, -0.55, 1))
         }
+
         draw(context){
             if(this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height)
             context.save()
@@ -1651,15 +1713,15 @@ class Level1Boss extends HorseMiniBoss {
     
         }
     }
-
+        // %boss2
     class WhaleBoss12 extends WhaleBoss1 {
         constructor(game,x,y){
             super(game, x, y)
-            this.maxLives = 200
-            this.lives = 200 //120
-            this.phase = 2
+            this.maxLives = 460
+            this.lives =  460      //500 
+            this.phase = 3
             this.spreadShootTimer = 0
-            this.spreadShootInterval =  200       //2500          // 550 for hardmode (: speed 6 for bullet and 6 bull amount
+            this.spreadShootInterval =  1600      //2500          // 550 for hardmode (: speed 6 for bullet and 6 bull amount
             this.staggerSpreadTimer = 0
             this.staggerSpreadInterval =  1200        //3000
             this.staggerShotTimer = 0
@@ -1678,24 +1740,31 @@ class Level1Boss extends HorseMiniBoss {
             this.triShotLocationOffset = -70
             this.triShotInversion = 1
             this.triAmount = 0
+            this.spreadShootTimer = 0
+            this.spreadShootInterval = 2000
+            this.groupAimTimer = -400
+            this.groupAimInterval = 1000
             this.attackQueue = 1
+            this.spreadShootCount = 0
+            this.groupAimCount = 0
 
         }
         update(deltaTime){
+            if(this.lives > 0){
             if(this.frameX < this.maxFrame){
                 this.frameX++
             }else this.frameX = 0
-            // if(this.lives > 130){
-            //     this.phase = 1
-            // }else if(this.lives > 60){
-            //     this.phase = 2
-            // } else if(this.lives > 0){
-            //     this.phase = 3
-            // }
+            if(this.lives > 420){
+                this.phase = 1
+            }else if(this.lives > 250){
+                this.phase = 2
+            } else if(this.lives > 0){
+                this.phase = 3
+            }
             if(this.damaged){this.damageCounter(deltaTime)}
             if(this.phase === 1){ 
-                //code
-                if(this.spreadShootTimer > this.spreadShootInterval){
+                let ratio = this.lives / this.maxLives
+                if(this.spreadShootTimer > this.spreadShootInterval * (ratio * ratio * ratio)){
                     this.shootSpreadHalf(5, "circle", 6)
                     // this.shootHiveVert()
                     this.spreadShootTimer = 0
@@ -1750,7 +1819,7 @@ class Level1Boss extends HorseMiniBoss {
              }else if(this.attackQueue === 2){
                 if(this.hiveShotTimer > this.hiveShotInterval){
                     // this.shootHiveVert(this.hiveAmount)
-                    if(this.hiveAmount < 4){
+                    if(this.hiveAmount < 5){
                         this.shootHiveVert(this.hiveAmount)
                         this.hiveAmount++
                     }
@@ -1772,35 +1841,38 @@ class Level1Boss extends HorseMiniBoss {
                 //     this.hiveShotTimer = 0
                     
                 // }else {this.hiveShotTimer += deltaTime}
-                if(this.triShotTimer > this.triShotInterval){
-                    if(this.staggerTriTimer > this.staggerTriInterval){
-                    this.shootTriShot(this.triShotLocationOffset)
-                    this.triShotLocationOffset += 60 * this.triShotInversion
-                    this.triAmount++
-                    if(this.triAmount > 3){ 
-                        this.triShotTimer = 0
-                        // this.triShotLocationOffset = -140
-                        this.triAmount = 0
-                        this.triShotLocationOffset = -70
-                    }
-                    this.staggerTriTimer = 0
-                    }else {this.staggerTriTimer+= deltaTime}
-                }else {this.triShotTimer += deltaTime}
-                this.x = 20 * Math.sin((this.xAngle ) * Math.PI/200) + (this.Xorigin - this.width * 0.5) 
-                this.y = 35 * Math.cos((this.yAngle * 0.5 ) * Math.PI/200) + (this.Yorigin - this.height * 0.5) 
-                this.xAngle+= this.xAngleSpeed
-                this.yAngle += this.yAngleSpeed
+                if(this.attackQueue === 1){
+                    if(this.spreadShootTimer > this.spreadShootInterval){
+                        this.shootSpreadHalf(12)
+                        this.spreadShootTimer = 0
+                        this.spreadShootCount++
+                        if(this.spreadShootCount > 5) this.attackQueue = 2
+                    }else {this.spreadShootTimer += deltaTime}
+                }
+
+                if(this.attackQueue === 2){
+                    if(this.groupAimTimer > this.groupAimInterval){
+                    this.groupAim()
+                    this.groupAimTimer = 0
+                    this.groupAimCount++
+                    if(this.groupAimCount > 8) this.attackQueue = 1
+                    }else {this.groupAimTimer += deltaTime}
+                }
+
+
+                
                 
             }
 
 
 
-            if(!(this.staggerSpreadTimer > this.staggerSpreadInterval) && this.phase !== 3){
+            if( this.phase !== 2 || !(this.staggerSpreadTimer > this.staggerSpreadInterval)){
                 this.x = 20 * Math.sin((this.xAngle ) * Math.PI/200) + (this.Xorigin - this.width * 0.5) 
                 this.y = 130 * Math.cos((this.yAngle * 2 ) * Math.PI/200) + (this.Yorigin - this.height * 0.5) 
                 this.xAngle+= this.xAngleSpeed
                 this.yAngle += this.yAngleSpeed
                 }
+        }else {this.deathAnimationDrawUpdate(deltaTime)}
         }
         shootHiveVert(num){
             console.log(num)
@@ -1821,6 +1893,12 @@ class Level1Boss extends HorseMiniBoss {
             this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 - 15 - (num),-1, 0, 0))
             this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5  - (num),-1 , 0.45, 0))
             this.game.enemyProjectiles.push(new EnemyProjectile(this.game, this.x, this.y  + this.height * 0.5 - 15 - (num) ,-1, 0.45, 0))
+        }
+        groupAim(){
+            this.game.cope.push(new StaggeredAim(this.game, this.x, this.y  + this.height * 0.5,1,1,0,0.5, -100, 50))
+            this.game.cope.push(new StaggeredAim(this.game, this.x, this.y  + this.height * 0.5,1,1,0,0.5, -200, 150))
+            this.game.cope.push(new StaggeredAim(this.game, this.x, this.y  + this.height * 0.5,1,1,0,0.5, -100, -50))
+            this.game.cope.push(new StaggeredAim(this.game, this.x, this.y  + this.height * 0.5,1,1,0,0.5, -200, -150))
         }
 
     }
@@ -1861,18 +1939,24 @@ class Level1Boss extends HorseMiniBoss {
     class Boss3 extends WhaleBoss1 {
         constructor(game,x,y){
             super(game, x, y)
-            this.maxLives = 200
-            this.lives = 200 //120
+            this.maxLives = 620
+            this.lives = 620 //120
             this.phase = 4
+            this.image = document.getElementById("moonfish")
+            this.maxFrame = 38
+            this.spriteWidth = 227
+            this.spriteHeight = 240
+            this.width = this.spriteWidth * 1.7
+            this.height = this.spriteHeight * 1.7
             this.spreadShootTimer = 0
             this.spreadShootInterval =  200       //2500          // 550 for hardmode (: speed 6 for bullet and 6 bull amount
             this.staggerSpreadTimer = 0
             this.staggerSpreadInterval =  3000       //3000          1200 hardmode maybe
             this.staggerShotTimer = 0
             this.staggerShotInterval = 150 //200
-            this.stagbulletAmount = 10
+            this.stagbulletAmount = 14
             this.off = this.stagbulletAmount * 2
-            this.fakeI = this.stagbulletAmount
+            this.fakeI =  this.stagbulletAmount - 4
             this.fakeIReverser = 1
             this.hiveShotTimer = 0
             this.hiveShotInterval =   1500       //1500
@@ -1892,50 +1976,51 @@ class Level1Boss extends HorseMiniBoss {
             this.summonType = 1
             this.groupAimTimer = 0
             this.groupAimInterval = 2000
+            this.passedPhased2 = false
+            this.passedPhased3 = false
 
         }
         update(deltaTime){
+            if(this.lives > 0){
             if(this.frameX < this.maxFrame){
                 this.frameX++
             }else this.frameX = 0
-            // if(this.lives > 130){
-            //     this.phase = 3
-            // }else if(this.lives > 60){
-            //     this.phase = 3
-            // } else if(this.lives > 0){
-            //     this.phase = 3
-            // }
+            
+            if(this.lives > 500){
+                this.phase = 1
+            }else if(this.lives > 260){
+                this.phase = 2
+            } else if(this.lives > 160){
+                this.phase = 3
+            }else if (this.lives > 0){
+                this.phase = 4
+            }
+            this.managePhases()
             if(this.damaged){this.damageCounter(deltaTime)}
-            if(this.phase === 1){ 
-                //code
-                if(this.spreadShootTimer > this.spreadShootInterval){
-                    this.shootSpreadHalf(5, "circle", 6)
-                    // this.shootHiveVert()
-                    this.spreadShootTimer = 0
-                }else {this.spreadShootTimer += deltaTime}
-                if(this.spawnDroneTimer > this.spawnDroneInterval){
-                    this.game.cope.push(new MiniDrone(this.game, this.x, this.y + this.height / 2, 1.5))
-                    this.spawnDroneTimer = 0
-                    // this.shootSpreadHalf(12)
-                    // this.fireSinRadius()
-                    // this.spawnExplosion()
-                    // this.spawnWarning()
-                    
-                } else this.spawnDroneTimer+= deltaTime
+            if(this.phase === 2){ 
+                if(this.summonTimer > this.summonInterval){
+                    this.SummonMinions(this.summonType)
+                    this.summonTimer = 0
+                }else {this.summonTimer += deltaTime}
+                this.x = 20 * Math.sin((this.xAngle ) * Math.PI/200) + (this.Xorigin - this.width * 0.5) 
+                this.y = 50 * Math.cos((this.yAngle *  0.9) * Math.PI/200) + (this.Yorigin - this.height * 0.5) 
+                this.xAngle+= this.xAngleSpeed
+                this.yAngle += this.yAngleSpeed
+                
             }
 
-            if(this.phase === 2){
+            if(this.phase === 1){
                 if(this.staggerSpreadTimer > this.staggerSpreadInterval){
                     if(this.staggerShotTimer > this.staggerShotInterval){
                         let offed = 1 / this.off * (this.fakeI - 5) * 400
-                        this.game.enemyProjectiles.push(new testEPCircle(this.game, this.x, this.y + this.height * 0.5, -1, 234, 1, offed + 200, 2))
-                        this.game.enemyProjectiles.push(new testEPCircle(this.game, this.x, this.y + this.height * 0.5, -1, 234, 1, -offed , 2))
+                        this.game.enemyProjectiles.push(new testEPCircle(this.game, this.x + this.width * 0.5, this.y + this.height * 0.5, -1, 234, 1, offed + 200, 3, 2.5))
+                        this.game.enemyProjectiles.push(new testEPCircle(this.game, this.x + this.width * 0.5, this.y + this.height * 0.5, -1, 234, 1, -offed , 3, 2.5))
                         // this.game.enemyProjectiles.push(new testEPCircle(this.game, this.x, this.y + this.height * 0.5, -1, 234, 1, -offed + 400, 2))
                         this.fakeI++
                         this.staggerShotTimer = 0
                         console.log(offed)
                         if(this.fakeI - 5 >  this.off -5){
-                            this.fakeI = this.stagbulletAmount
+                            this.fakeI = this.stagbulletAmount - 2
                             this.staggerShotTimer = 0
                             this.staggerSpreadTimer = 0
                         }
@@ -1947,7 +2032,7 @@ class Level1Boss extends HorseMiniBoss {
 
 
             }
-            if(this.phase === 3){
+            if(this.phase === 4){
                 if(this.staggerSpreadTimer > this.staggerSpreadInterval){
                     if(this.staggerShotTimer > this.staggerShotInterval){
                         let offed = 1 / this.off * (this.fakeI - 8) * 400
@@ -1967,6 +2052,8 @@ class Level1Boss extends HorseMiniBoss {
                 }else {
                     this.staggerSpreadTimer += deltaTime
                 }
+                this.y = 60
+                this.x = 500
                 if(this.bubbleTimer > this.bubbleInterval){
                     this.shootBubble()
                     this.bubbleTimer = 0
@@ -1974,31 +2061,56 @@ class Level1Boss extends HorseMiniBoss {
                 
             }
 
-            if(this.phase === 4){
-                if(this.summonTimer > this.summonInterval){
-                    //this.SummonMinions(this.summonType)
-                    this.summonTimer = 0
-                }else {this.summonTimer += deltaTime}
+            if(this.phase === 3){
+                
 
                 this.x = 15 * Math.sin((this.xAngle ) * Math.PI/200) + (this.Xorigin - this.width * 0.5) + 100
                 this.y = 30 * Math.cos((this.yAngle * 2 ) * Math.PI/200) + (this.Yorigin - this.height * 0.5) 
                 this.xAngle+= this.xAngleSpeed
                 this.yAngle += this.yAngleSpeed
-                if(this.groupAimTimer > this.groupAimInterval){
-                    this.groupAim()
-                    this.groupAimTimer = 0
-                }else {this.groupAimTimer += deltaTime}
+                if(this.bubbleTimer > this.bubbleInterval / 2){
+                    this.shootBubble()
+                    this.bubbleTimer = 0
+                }else this.bubbleTimer+= deltaTime
             }
 
 
 
-            if(!(this.staggerSpreadTimer > this.staggerSpreadInterval) && (this.phase !== 3 && this.phase !== 4)){
+            if(!(this.staggerSpreadTimer > this.staggerSpreadInterval) && (this.phase !== 3 && this.phase !== 4 && this.phase !== 2)){
                 this.x = 20 * Math.sin((this.xAngle ) * Math.PI/200) + (this.Xorigin - this.width * 0.5) 
                 this.y = 50 * Math.cos((this.yAngle * 2 ) * Math.PI/200) + (this.Yorigin - this.height * 0.5) 
                 this.xAngle+= this.xAngleSpeed
                 this.yAngle += this.yAngleSpeed
                 }
+            this.updateDamageAmount()
+        }else {this.deathAnimationDrawUpdate(deltaTime)}
         }
+        draw(context){
+            if(this.lives > 0){
+            if(this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height)
+            context.save()
+            context.imageSmoothingEnabled = true
+            if(this.damaged) context.filter = "grayscale(10%) saturate(4)";
+            context.drawImage(this.image,this.frameX * this.spriteWidth,this.frameY *  this.height, this.spriteWidth, this.spriteHeight, this.x, this.y, this.width, this.height)
+            context.restore()
+            context.save()
+            this.drawBossHealthBar(context, 450, 450, 200, 40, this.maxLives, this.lives)
+            // if(this.damaged){
+            //     this.drawDamageAnimation(context, this.x, this.y, this.width, this.height)
+            // }
+            context.restore()
+            }else {this.deathAnimationDraw(context)}
+        }
+
+        managePhases(){
+            if(this.lives < 160 && !this.passedPhased3){
+                this.passedPhased3 = true
+                this.bubbleTimer = 0
+                this.staggerSpreadTimer = 0
+            }
+        }
+
+
         shootHiveVert(num){
             console.log(num)
             this.game.enemyProjectiles.push(new VerticalAimed2(this.game, this.x, this.y + this.height * 0.4,  1, -3))
@@ -2038,7 +2150,42 @@ class Level1Boss extends HorseMiniBoss {
             this.game.cope.push(new StaggeredAim(this.game, this.x, this.y  + this.height * 0.5,1,1,0,0.5, -100, -50))
             this.game.cope.push(new StaggeredAim(this.game, this.x, this.y  + this.height * 0.5,1,1,0,0.5, -200, -150))
         }
+        deathAnimationDraw(context) {
+            // Increment the elapsed time on each frame
+          
+            // Calculate the current angle based on the elapsed time and tilt rate
+          
+            context.save();
+          
+            const imageCenterX = this.x + this.width / 2;
+            const imageCenterY = this.y + this.height / 2;
+            context.translate(imageCenterX, imageCenterY);
+          
+            // Rotate the context by the current angle
+            context.rotate(this.currentAngle);
+          
+            // Draw the image at its new rotated position
+            context.drawImage(
+              this.image,
+              this.frameX * this.spriteWidth,
+              this.frameY * this.spriteHeight,
+              this.spriteWidth,
+              this.spriteHeight,
+              -this.width / 2,
+              -this.height / 2,
+              this.width,
+              this.height
+            );
+          
+            // Restore the context to its original state
+            context.restore();
+            if(this.deathelapse % 500 <= 17){ 
+                this.spawnExplosion( this.x + 40 + this.width * deathAnimationExplosionLocations[0].x * 0.5, this.y + 40 + this.height * deathAnimationExplosionLocations[0].y)
+                deathAnimationExplosionLocations.push(deathAnimationExplosionLocations.shift())
+            }
 
+
+            }
     }
 
     class ShootingBall extends Enemy{
@@ -2046,21 +2193,24 @@ class Level1Boss extends HorseMiniBoss {
             super(game)
             this.x = x
             this.y = y
-            this.staggerSpreadInterval = 2000
+            this.staggerSpreadInterval = 500
             this.staggerSpreadTimer = 0
             this.staggerShotInterval = 300
             this.staggerShotTimer = 0
+            this.image = new Image()
+            this.image.src = "assets/bugShip.png"
             this.width = 50
             this.height = 50
-            this.lives = 2
+            this.lives = 99
             this.stagbulletAmount = 15
             this.off = this.stagbulletAmount //* 2
-            this.fakeI = 0
             this.destinX = destinX
             this.destinY = destinY
             this.point = 0
             this.inversion = -1
             this.type = type
+            this.fakeI = this.type === 2 ? this.stagbulletAmount / 2 : 0
+            this.bulky = true
 
 
 
@@ -2073,6 +2223,10 @@ class Level1Boss extends HorseMiniBoss {
                 this.y-= ((this.destinY + this.y) - this.y) / 50
                 // this.y+= (this.targetY - this.y) / 50
                 this.point++
+                if(this.point >= 16 && this.bulky){
+                    this.lives = 2
+                    this.bulky = false
+                } 
             }
             if(this.type === 1){
             if(this.staggerSpreadTimer > this.staggerSpreadInterval){
@@ -2095,10 +2249,35 @@ class Level1Boss extends HorseMiniBoss {
                     
                 }else this.staggerShotTimer += deltaTime
             }else this.staggerSpreadTimer += deltaTime
+         }if(this.type === 2){
+            if(this.staggerSpreadTimer > this.staggerSpreadInterval){
+                if(this.staggerShotTimer > this.staggerShotInterval){
+                    console.log("ok")
+                    // this.staggerShotInterval = 150
+                    let offed = 1 / this.off * (this.inversion * this.fakeI) * 400 //400
+                    // let onned = 1 / this.off  * this.fakeI * 440 //400
+                    this.game.enemyProjectiles.push(new testEP(this.game, this.x, this.y + this.height * 0.5, -1, 234, 1, offed, 3))
+                    // this.game.enemyProjectiles.push(new testEP(this.game, this.x, this.y + this.height * 0.5, -1, 234, 1, onned, 3))
+                    this.fakeI--
+                    console.log(offed)
+                    console.log(this.fakeI)
+                    this.staggerShotTimer = 0
+                    if(this.fakeI <= -6){
+                        // this.staggerSpreadTimer = 0 // Delete maybe
+                        // this.fakeI = 0
+                        this.markedForDeletion = true
+                    }
+                    
+                }else this.staggerShotTimer += deltaTime
+            }else this.staggerSpreadTimer += deltaTime
          }
         }
         draw(context){
-            context.fillRect(this.x,this.y,this.width, this.height)
+            // context.fillRect(this.x,this.y,this.width, this.height)
+            context.drawImage(this.image,this.x, this.y, this.width, this.height)
+        }
+        updateLives(){
+            this.lives = 2
         }
 
 
@@ -2120,10 +2299,11 @@ class Level1Boss extends HorseMiniBoss {
             this.bulletLineInterval = 1000
         }
         update(deltaTime){
+            if(this.damaged){this.damageCounter(deltaTime)}
             if(this.spawnExplosionTimer > this.spawnExplosionInterval){
-                // this.SummonRevengeShips()
+                this.SummonRevengeShips()
                 this.spawnWarning()
-                this.ShootStaggeredAim()
+                // this.ShootStaggeredAim()
                 this.spawnExplosionTimer = 0
             }else {this.spawnExplosionTimer += deltaTime}
             
@@ -2359,9 +2539,20 @@ class DamagingExplosion {
     }
     }
     draw(context){
-        context.strokeRect(this.x, this.y, this.width, this.height)
+        // context.strokeRect(this.x, this.y, this.width, this.height)
         context.drawImage(this.image, this.frame * this.width * 2, 0, this.width *2, this.height * 2, this.x - 60, this.y - 70, this.width * 2, this.height * 2)
     }
+}
+
+class DecorativeExplosion extends DamagingExplosion {
+constructor(game, x, y){
+    super(game, x, y)
+}
+
+draw(context){
+    // context.strokeRect(this.x, this.y, this.width, this.height)
+    context.drawImage(this.image, this.frame * this.width * 2, 0, this.width *2, this.height * 2, this.x - 60, this.y - 70, this.width * 5, this.height * 5)
+}
 }
 
 class Warning {
@@ -2419,19 +2610,28 @@ class Warning {
 
 
 
- let ExplosionTemplate = [ 1, 0, 1, 0, 0, 0, 0,
-                           1, 0, 0, 0, 0, 0, 1,
+ let ExplosionTemplate = [ 1, 0, 1, 0, 0, 0, 0,1,
+                             0, 0, 0, 0, 0, 1,
                            1, 0, 1, 0, 0, 0, 0,
                            1, 0, 0, 0, 1, 0, 1,]
 let ExplosionTemplate2 = [ 1, 0, 1, 0, 0, 0, 0,
-                            0, 0, 0, 0, 0, 0, 1,
+                            0, 1, 0, 0, 0, 0, 1,
                             0, 0, 1, 0, 0, 0, 0,
-                            0, 0, 0, 0, 1, 0, 1,]
-let ExplosionTemplate3 = [ 1, 0, 1, 0, 0, 0, 0,
+                            0, 0, 0, 1, 1, 0, 1,]
+let ExplosionTemplate3 = [ 1, 1, 1, 0, 0, 0, 0,
                             1, 1, 1, 1, 1, 1, 1,
                             1, 0, 1, 0, 0, 0, 0,
                             1, 0, 0, 0, 1, 0, 1,]
-let explosionArrayHolder = [ExplosionTemplate, ExplosionTemplate2, ExplosionTemplate3]
+let ExplosionTemplate4 = [ 1, 1, 1, 0, 0, 0, 0,
+                          1, 1, 0, 1, 0, 1, 1,
+                          1, 0, 1, 0, 1, 0, 0,
+                          1, 0, 0, 1, 0, 0, 1,]
+let ExplosionTemplate5 = [ 1, 0, 0, 0, 0, 0, 1,
+                           1, 1, 0, 0, 0, 1, 0,
+                           1, 0, 1, 0, 1, 0, 0,
+                           1, 0, 0, 1, 0, 0, 1,]
+let explosionArrayHolder = [ExplosionTemplate, ExplosionTemplate2, ExplosionTemplate3, ExplosionTemplate4, ExplosionTemplate5]
+let deathAnimationExplosionLocations = [{x : 0, y : 0}, {x:1,y:0}, {x:0,y:0.5}, {x:1,y:0.5}]
 
 // let x =  i % 7 * 128                          
 // let y = Math.floor(i / 7) * 128
@@ -2439,7 +2639,7 @@ let explosionArrayHolder = [ExplosionTemplate, ExplosionTemplate2, ExplosionTemp
 
 
 
-export {Enemy, Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, NewShip5, Alien, Aliencu, SprayShip, AlienTarget, Meteor, ShipY, RevengeShip, SummonedRevengeShip, AlienBu, AlienBuPoint, AlienBuCircle, HorseMiniBoss, HomingMissle, WhaleBoss1, WhaleBoss11, WhaleBoss12, Boss3, Boss4, MiniDrone, ShootingBall, DamagingExplosion, Warning, ShipMini, Ship4, MultiShotShip, AlienGroup};
+export {Enemy, Angler1, Angler2, LuckyFish, HiveWhale, Drone, NewShip, NewShip5, Alien, Aliencu, SprayShip, AlienTarget, Meteor, ShipY, RevengeShip, SummonedRevengeShip, AlienBu, AlienBuPoint, AlienBuCircle, HorseMiniBoss, HomingMissle, WhaleBoss1, WhaleBoss11, WhaleBoss12, Boss3, Boss4, MiniDrone, ShootingBall, DamagingExplosion, Warning, ShipMini, Ship4, MultiShotShip, AlienGroup, DecorativeExplosion};
 
 
 
