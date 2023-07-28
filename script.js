@@ -710,21 +710,46 @@ window.addEventListener('load', function(){
 
 
     
-    let lasTime = 0
-    transitionFade = false
-    //animation loop
-    function animate(timeStamp){
-        const deltaTime = timeStamp - lasTime
-        lasTime = timeStamp
-        if(!game.gameOver && !game.paused){
+    // let lasTime = 0
+    // transitionFade = false
+    // //animation loop
+    // function animate(timeStamp){
 
-        ctx.clearRect(0,0, canvas.width, canvas.height)
-        game.update(deltaTime)
-    }
-        game.draw(ctx)
-        // console.log(deltaTime)
-         if (!game.gameOver) requestAnimationFrame(animate)
-    }
-    animate(0)
+    //     const deltaTime = timeStamp - lasTime
+    //     lasTime = timeStamp
+    //     if(!game.gameOver && !game.paused){
+
+    //     ctx.clearRect(0,0, canvas.width, canvas.height)
+    //     game.update(deltaTime)
+    // }
+    //     game.draw(ctx)
+    //     // console.log(deltaTime)
+    //      if (!game.gameOver) requestAnimationFrame(animate)
+    // }
+    // animate(0)
+transitionFade = false
+let lastTime = 0;
+const targetFrameTime = 1000 / 60; // 1000 ms (1 second) divided by 60 fps
+
+function animate(timeStamp) {
+  const deltaTime = timeStamp - lastTime;
+  lastTime = timeStamp;
+
+  if (!game.gameOver && !game.paused) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    game.update(deltaTime);
+    game.draw(ctx);
+  }
+
+  // Calculate the time to wait until the next frame
+  const timeToNextFrame = Math.max(targetFrameTime - deltaTime, 0);
+
+  // Wait for the remaining time to reach 60 fps
+  setTimeout(() => {
+    if (!game.gameOver) requestAnimationFrame(animate);
+  }, timeToNextFrame);
+}
+
+animate(0);
     console.log("hi")
 })
